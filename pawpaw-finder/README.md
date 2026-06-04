@@ -1,15 +1,15 @@
 # 🐾 PawPaw Finder
 
-PawPaw Finder is a modern, real-time web application dedicated to helping communities reunite with their lost pets. Built with a responsive and stunning UI, it provides an intuitive platform for reporting lost pets, finding found pets, and coordinating rescues through interactive maps and live chat.
+**PawPaw Finder** adalah aplikasi web modern *real-time* yang didedikasikan untuk membantu komunitas menemukan dan mempertemukan kembali hewan peliharaan yang hilang. Dibangun dengan antarmuka yang responsif, imut, dan memukau, platform ini memudahkan Anda untuk melaporkan hewan peliharaan yang hilang, menemukan hewan peliharaan terlantar, dan berkoordinasi melalui peta interaktif serta fitur *live chat*.
 
-## ✨ Key Features
+## ✨ Fitur Utama
 
-- **🗺️ Interactive Pet Radar Map**: Real-time map integration (powered by Leaflet) to visually track and locate reported lost and found pets in your area.
-- **💬 Real-time Live Chat**: A multi-tier chat setup powered by Firebase, allowing instant communication between pet owners and finders.
-- **🌙 Complete Dark Theme**: A beautifully crafted, fully responsive design with native dark mode support (built with Tailwind CSS).
-- **📋 Comprehensive Reporting**: Easily submit detailed reports for lost or found pets, including image uploads and precise location tagging.
-- **📊 User & Admin Dashboards**: Centralized hubs to manage reports, track statuses, and export data (PDF/Excel support).
-- **📱 QR Code Generation**: Instantly generate QR codes for pet profiles to easily share them across social media or print them on flyers.
+- **🗺️ Interactive Pet Radar Map**: Peta *real-time* (didukung oleh Leaflet) untuk melacak dan mencari lokasi hewan peliharaan secara visual di area Anda.
+- **💬 Real-time Live Chat**: Fitur percakapan langsung berbasis Firebase yang memungkinkan komunikasi instan antara pemilik hewan dan penemu.
+- **🌙 Complete Dark Theme**: Desain antarmuka yang indah, *fully responsive*, dan nyaman di mata dengan dukungan *dark mode* bawaan (menggunakan Tailwind CSS v4).
+- **📋 Comprehensive Reporting**: Buat laporan detail dengan mudah, termasuk unggahan foto dan penandaan lokasi (*geolocation*) yang presisi.
+- **📊 Dashboard Interaktif**: Hub pusat untuk mengelola laporan, melacak status, dan mengekspor data (mendukung format PDF & Excel) baik untuk Pengguna maupun Admin.
+- **📱 QR Code Generation**: Buat QR Code untuk profil hewan peliharaan secara instan agar mudah dibagikan ke media sosial atau dicetak pada poster.
 
 ## 🛠️ Tech Stack
 
@@ -31,18 +31,18 @@ PawPaw Finder is a modern, real-time web application dedicated to helping commun
 - **Data Export**: `jspdf`, `html2pdf.js`, `xlsx`
 - **QR Codes**: `qrcode.vue`
 
-## 🚀 Getting Started
+## 🚀 Cara Menjalankan Project
 
-### Prerequisites
+### Prasyarat
 
-Ensure you have [Node.js](https://nodejs.org/) (v18+ recommended) installed on your machine.
+Pastikan Anda telah menginstal [Node.js](https://nodejs.org/) (disarankan v18 ke atas) di komputer Anda.
 
-### Installation
+### Instalasi
 
-1. **Clone the repository** (if you haven't already):
+1. **Clone repositori ini** (jika belum):
    ```bash
-   git clone https://github.com/qdamai/Website-Pet-Finder.git
-   cd Website-Pet-Finder/pawpaw-finder
+   git clone https://github.com/qdamai/Website-For-Pet.git
+   cd Website-For-Pet/pawpaw-finder
    ```
 
 2. **Install dependencies**:
@@ -50,8 +50,8 @@ Ensure you have [Node.js](https://nodejs.org/) (v18+ recommended) installed on y
    npm install
    ```
 
-3. **Set up Firebase Environment Variables**:
-   Create a `.env` file in the root directory and add your Firebase configuration (replace with your actual Firebase project credentials):
+3. **Atur Variabel Lingkungan (Environment Variables) Firebase**:
+   Buat file bernama `.env` di dalam folder `pawpaw-finder` dan tambahkan konfigurasi Firebase Anda (ganti nilainya dengan kredensial project Firebase Anda yang asli):
    ```env
    VITE_FIREBASE_API_KEY=your_api_key
    VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
@@ -61,27 +61,27 @@ Ensure you have [Node.js](https://nodejs.org/) (v18+ recommended) installed on y
    VITE_FIREBASE_APP_ID=your_app_id
    ```
 
-4. **Run the development server**:
+4. **Jalankan server development**:
    ```bash
    npm run dev
    ```
-   The application will be available at `http://localhost:5173`.
+   Aplikasi akan berjalan dan bisa diakses melalui `http://localhost:5173`.
 
-## 📦 Build for Production
+## 📦 Build untuk Production
 
-To build the application for production, run:
+Untuk melakukan *build* aplikasi agar siap di-*deploy*, jalankan perintah:
 ```bash
 npm run build
 ```
-You can then preview the production build locally:
+Anda kemudian bisa melihat hasil *build* secara lokal dengan perintah:
 ```bash
 npm run preview
 ```
 
-## 🤝 Contributing
+## 🤝 Berkontribusi
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/qdamai/Website-Pet-Finder/issues).
+Kontribusi, laporan *bug*, dan permintaan fitur sangat kami hargai! Jangan ragu untuk mengunjungi [halaman issues](https://github.com/qdamai/Website-For-Pet/issues) kami.
 
-## 📄 License
+## 📄 Lisensi
 
-This project is licensed under the MIT License.
+Project ini dilisensikan di bawah lisensi MIT.
