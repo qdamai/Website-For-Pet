@@ -1,87 +1,43 @@
-# 🐾 PawPaw Finder
+# 🐾 PawPaws (Website For Pet)
 
-PawPaw Finder is a modern, real-time web application dedicated to helping communities reunite with their lost pets. Built with a responsive and stunning UI, it provides an intuitive platform for reporting lost pets, finding found pets, and coordinating rescues through interactive maps and live chat.
+Welcome to the **PawPaws** repository! This is the main repository (monorepo) that houses our suite of modern, user-friendly web applications dedicated to pet care, community tracking, and adoption.
 
-## ✨ Key Features
+## 📁 Project Structure
 
-- **🗺️ Interactive Pet Radar Map**: Real-time map integration (powered by Leaflet) to visually track and locate reported lost and found pets in your area.
-- **💬 Real-time Live Chat**: A multi-tier chat setup powered by Firebase, allowing instant communication between pet owners and finders.
-- **🌙 Complete Dark Theme**: A beautifully crafted, fully responsive design with native dark mode support (built with Tailwind CSS).
-- **📋 Comprehensive Reporting**: Easily submit detailed reports for lost or found pets, including image uploads and precise location tagging.
-- **📊 User & Admin Dashboards**: Centralized hubs to manage reports, track statuses, and export data (PDF/Excel support).
-- **📱 QR Code Generation**: Instantly generate QR codes for pet profiles to easily share them across social media or print them on flyers.
+This repository is organized into multiple sub-projects, each serving a specific purpose in the PawPaws ecosystem:
 
-## 🛠️ Tech Stack
+### 1. [PawPaw Finder](./pawpaw-finder/)
+A real-time web application to help communities reunite with their lost pets. 
+- **Features:** Interactive Pet Radar Map, Real-time Live Chat, complete dark theme, and comprehensive reporting.
+- **Tech Stack:** Vue 3, Vite, Tailwind CSS v4, Firebase, Leaflet.
+- [👉 Read the full documentation for PawPaw Finder here](./pawpaw-finder/README.md)
 
-### Core
-- **[Vue 3](https://vuejs.org/)** (Composition API / `<script setup>`)
-- **[Vite](https://vitejs.dev/)** (Next Generation Frontend Tooling)
-- **[Tailwind CSS v4](https://tailwindcss.com/)** (Utility-first CSS framework)
+### 2. PawPaw Adopt *(Coming Soon 🚀)*
+*(Planned)* An upcoming platform dedicated to facilitating pet adoptions, connecting loving homes with pets in need.
 
-### State Management & Routing
-- **[Pinia](https://pinia.vuejs.org/)** (Intuitive, type safe state management)
-- **[Vue Router](https://router.vuejs.org/)**
+---
 
-### Backend Services
-- **[Firebase](https://firebase.google.com/)** (Authentication, Firestore Database, Cloud Storage)
+## 🛠️ Getting Started
 
-### Libraries & Integrations
-- **Maps**: `leaflet` & `@vue-leaflet/vue-leaflet`
-- **Icons**: `lucide-vue-next`
-- **Data Export**: `jspdf`, `html2pdf.js`, `xlsx`
-- **QR Codes**: `qrcode.vue`
+Since this is a monorepo, each application has its own setup process. To get started with a specific project, please navigate to its directory first. 
 
-## 🚀 Getting Started
+For example, to run the **PawPaw Finder** application:
 
-### Prerequisites
-
-Ensure you have [Node.js](https://nodejs.org/) (v18+ recommended) installed on your machine.
-
-### Installation
-
-1. **Clone the repository** (if you haven't already):
-   ```bash
-   git clone https://github.com/qdamai/Website-Pet-Finder.git
-   cd Website-Pet-Finder/pawpaw-finder
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Set up Firebase Environment Variables**:
-   Create a `.env` file in the root directory and add your Firebase configuration (replace with your actual Firebase project credentials):
-   ```env
-   VITE_FIREBASE_API_KEY=your_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   ```
-
-4. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
-   The application will be available at `http://localhost:5173`.
-
-## 📦 Build for Production
-
-To build the application for production, run:
 ```bash
-npm run build
+# 1. Masuk ke direktori project
+cd pawpaw-finder
+
+# 2. Install semua dependencies
+npm install
+
+# 3. Jalankan server development
+npm run dev
 ```
-You can then preview the production build locally:
-```bash
-npm run preview
-```
+
+*(Pastikan Anda membaca `README.md` spesifik di dalam setiap folder project untuk instruksi detail seperti pengaturan file `.env` dll).*
 
 ## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/qdamai/Website-Pet-Finder/issues).
+Contributions are always welcome! Feel free to open an issue or submit a pull request if you'd like to improve the applications.
 
 ## 📄 License
-
 This project is licensed under the MIT License.
