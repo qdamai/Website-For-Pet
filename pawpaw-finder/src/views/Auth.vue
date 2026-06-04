@@ -122,7 +122,7 @@ const handleSubmit = async () => {
   padding: 1rem;
   position: relative;
   overflow: hidden;
-  background-color: #FFFDF9;
+  background-color: var(--color-bg);
   font-family: 'Nunito', sans-serif;
 }
 
@@ -134,7 +134,7 @@ const handleSubmit = async () => {
   bottom: 0;
   background-image: radial-gradient(#64B5F6 2px, transparent 2px);
   background-size: 30px 30px;
-  opacity: 0.2;
+  opacity: 0.1;
   pointer-events: none;
 }
 
@@ -142,10 +142,10 @@ const handleSubmit = async () => {
   width: 100%;
   max-width: 480px;
   padding: 2.5rem;
-  background-color: #FFFDF9;
-  border: 4px solid #1A1A1A;
+  background-color: var(--color-card-bg);
+  border: 3px solid #000000;
   border-radius: 32px;
-  box-shadow: 8px 8px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   position: relative;
   z-index: 10;
 }
@@ -155,7 +155,7 @@ const handleSubmit = async () => {
   font-size: 2.25rem;
   font-weight: 800;
   text-align: center;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin-bottom: 2rem;
 }
 
@@ -164,7 +164,7 @@ const handleSubmit = async () => {
   color: white;
   padding: 0.75rem;
   border-radius: 12px;
-  border: 3px solid #1A1A1A;
+  border: 3px solid #000000;
   margin-bottom: 1.5rem;
   font-weight: 800;
   text-align: center;
@@ -177,16 +177,17 @@ const handleSubmit = async () => {
 .form-group label {
   display: block;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin-bottom: 0.5rem;
 }
 
 .neo-input {
   width: 100%;
   padding: 0.875rem 1rem;
-  background-color: white;
-  border: 3px solid #1A1A1A;
+  background-color: #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
+  color: #FFFFFF;
   font-weight: 600;
   font-family: 'Nunito', sans-serif;
   font-size: 1rem;
@@ -197,7 +198,8 @@ const handleSubmit = async () => {
 
 .neo-input:focus {
   border-color: #FF8A65;
-  box-shadow: 0 0 0 4px rgba(255, 138, 101, 0.2);
+  box-shadow: 4px 4px 0px 0px #000000;
+  transform: translate(-2px, -2px);
 }
 
 .auth-btn {
@@ -207,10 +209,10 @@ const handleSubmit = async () => {
   font-size: 1.25rem;
   padding: 1rem 1.5rem;
   background-color: #FF8A65;
-  border: 4px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 16px;
-  color: #FFFDF9;
-  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  color: #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   transition: all 0.15s ease-in-out;
   cursor: pointer;
   outline: none;
@@ -220,7 +222,7 @@ const handleSubmit = async () => {
 .auth-btn:hover:not(:disabled) {
   background-color: #FF7A50;
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .auth-btn:active:not(:disabled) {
@@ -237,7 +239,7 @@ const handleSubmit = async () => {
   text-align: center;
   margin-top: 1.5rem;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
 }
 
 .toggle-link {

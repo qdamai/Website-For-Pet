@@ -1,7 +1,7 @@
 <template>
   <div class="pet-detail container my-8">
     <div style="margin-bottom: 2rem;">
-      <NeoButton @click="router.back()">Kembali</NeoButton>
+      <NeoButton @click="router.back()">{{ langStore.t('back') }}</NeoButton>
     </div>
 
     <div v-if="loading">
@@ -16,7 +16,7 @@
       <!-- Left Column (Photo & QR) -->
       <div class="flex flex-col gap-6">
         <NeoCard class="p-0 overflow-hidden">
-          <img :src="pet.photo" alt="Foto" class="w-full h-auto max-h-96 object-cover border-b-2 border-black" />
+          <img :src="pet.photo" alt="Foto" class="w-full h-auto max-h-96 object-cover border-b-3 border-black" />
           <div class="p-4 text-center">
             <h2 class="text-2xl font-bold">{{ pet.name || 'Hewan Ditemukan' }}</h2>
             <span class="badge" :class="pet.status === 'Missing' ? 'bg-primary' : 'bg-success'">{{ pet.status }}</span>
@@ -24,9 +24,9 @@
         </NeoCard>
 
         <NeoCard class="text-center">
-          <h3 class="font-bold mb-2">QR Code Darurat</h3>
-          <p class="text-sm mb-4">Scan kode ini untuk info darurat & kontak</p>
-          <div class="inline-block p-4 bg-white border-2 border-black rounded-lg mx-auto">
+          <h3 class="font-bold mb-2">{{ langStore.t('qrEmergency') }}</h3>
+          <p class="text-sm mb-4">{{ langStore.t('scanQrInfo') }}</p>
+          <div class="inline-block p-4 bg-white border-3 border-black rounded-lg mx-auto">
             <qrcode-vue :value="qrValue" :size="150" level="H" />
           </div>
         </NeoCard>
@@ -35,51 +35,56 @@
       <!-- Right Column (Info, AI & Map) -->
       <div class="flex flex-col gap-6">
         <NeoCard>
-          <h3 class="text-xl font-bold border-b-2 border-black pb-2 mb-4">Detail Laporan</h3>
+          <h3 class="text-xl font-bold border-b-3 border-black pb-2 mb-4">Detail Laporan</h3>
           <div class="neo-detail-grid">
             <div class="neo-detail-item bg-pink">
-              <span class="label">Jenis Hewan</span>
+              <span class="label">{{ langStore.t('type') }}</span>
               <span class="value">{{ pet.type }}</span>
             </div>
             <div class="neo-detail-item bg-blue">
-              <span class="label">Warna Dominan</span>
+              <span class="label">{{ langStore.t('color') }}</span>
               <span class="value">{{ pet.color }}</span>
             </div>
             <div v-if="pet.breed" class="neo-detail-item bg-yellow">
-              <span class="label">Ras / Spesies</span>
+              <span class="label">Ras</span>
               <span class="value">{{ pet.breed }}</span>
             </div>
             <div class="neo-detail-item bg-green">
-              <span class="label">Tanggal Laporan</span>
+              <span class="label">{{ langStore.t('date') }}</span>
               <span class="value">{{ pet.lostDate || pet.foundDate }}</span>
             </div>
           </div>
           
           <div class="neo-desc-box">
-            <span class="label">Deskripsi Tambahan</span>
+            <span class="label">{{ langStore.t('description') }}</span>
             <p class="value">{{ pet.description }}</p>
           </div>
 
           <div class="mt-6 flex flex-col gap-3">
-            <NeoButton variant="success" class="w-full btn-action" @click="startChat">Hubungi Pelapor</NeoButton>
+            <NeoButton variant="success" class="w-full btn-action" @click="startChat">{{ langStore.t('contactReporter') }}</NeoButton>
             <NeoButton variant="accent" class="w-full btn-action" @click="runAIMatch" :disabled="matchLoading">
-              {{ matchLoading ? 'Menganalisis...' : 'Jalankan Deteksi AI Kesesuaian' }}
+              {{ matchLoading ? 'Menganalisis...' : langStore.t('aiMatch') }}
             </NeoButton>
-            <NeoButton v-if="pet.status === 'Missing'" variant="primary" class="w-full btn-action" @click="generatePDF">Cetak Brosur WANTED (PDF)</NeoButton>
+            <NeoButton v-if="pet.status === 'Missing'" variant="primary" class="w-full btn-action" @click="generatePDF">{{ langStore.t('downloadWanted') }}</NeoButton>
           </div>
         </NeoCard>
 
         <NeoCard>
           <h3 class="font-bold mb-2">Peta Lokasi</h3>
           <p class="text-sm mb-4">Lokasi terakhir / ditemukan: <b>{{ pet.lastLocation || pet.foundLocation }}</b></p>
-          <div class="h-64 border-2 border-black rounded-lg overflow-hidden relative z-0">
-            <l-map ref="map" v-model:zoom="zoom" :center="[ -0.947083, 100.351111 ]">
+          <div class="h-64 border-3 border-black rounded-lg overflow-hidden relative z-0">
+            <l-map 
+              ref="detailMapRef" 
+              v-model:zoom="zoom" 
+              :center="[ pet.lat || -0.947083, pet.lng || 100.351111 ]"
+              :useGlobalLeaflet="false"
+            >
               <l-tile-layer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 layer-type="base"
                 name="OpenStreetMap"
               ></l-tile-layer>
-              <l-marker :lat-lng="[ -0.947083, 100.351111 ]"></l-marker>
+              <l-marker :lat-lng="[ pet.lat || -0.947083, pet.lng || 100.351111 ]"></l-marker>
             </l-map>
           </div>
         </NeoCard>
@@ -91,11 +96,11 @@
       <div class="neo-modal-card">
         <button class="close-btn" @click="showAIModal = false">X</button>
         <div class="text-center">
-          <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Deteksi Selesai</h2>
-          <p class="text-lg mb-6 bg-white p-4 border-2 border-black rounded-lg shadow-[2px_2px_0_#1a1a1a]">
-            AI mendeteksi kecocokan sebesar <b>{{ matchResult }}%</b> dengan laporan di wilayah <b>{{ pet.lastLocation || pet.foundLocation }}</b>!
+          <h2 class="text-2xl font-bold mb-4 border-b-3 border-black pb-2">{{ langStore.t('aiMatchResultTitle') }}</h2>
+          <p class="text-lg mb-6 bg-white p-4 border-3 border-black rounded-lg shadow-[4px_4px_0_#000000] text-black">
+            {{ langStore.t('aiMatchResultText') }} <b>{{ matchResult }}%</b> {{ langStore.t('aiMatchResultWith') }} <b>{{ pet.lastLocation || pet.foundLocation }}</b>!
           </p>
-          <NeoButton class="w-full btn-action" style="background-color: white; color: black;" @click="goToExplore">Lihat Laporan Terkait</NeoButton>
+          <NeoButton class="w-full btn-action" style="background-color: white; color: black;" @click="goToExplore">{{ langStore.t('viewRelatedReports') }}</NeoButton>
         </div>
       </div>
     </div>
@@ -104,10 +109,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePetStore } from '../stores/petStore';
 import { useAuthStore } from '../stores/auth';
+import { useLangStore } from '../stores/lang';
 import NeoCard from '../components/NeoCard.vue';
 import NeoButton from '../components/NeoButton.vue';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
@@ -123,13 +129,15 @@ const route = useRoute();
 const router = useRouter();
 const petStore = usePetStore();
 const authStore = useAuthStore();
+const langStore = useLangStore();
 
 const pet = ref(null);
 const loading = ref(true);
 const showAIModal = ref(false);
 const matchLoading = ref(false);
 const matchResult = ref(0);
-const zoom = ref(13);
+const zoom = ref(14);
+const detailMapRef = ref(null);
 
 const type = route.params.type; // 'lost' or 'found'
 const id = route.params.id;
@@ -141,6 +149,14 @@ const qrValue = computed(() => {
 onMounted(async () => {
   pet.value = await petStore.fetchPetById(type, id);
   loading.value = false;
+  
+  nextTick(() => {
+    setTimeout(() => {
+      if (detailMapRef.value && detailMapRef.value.leafletObject) {
+        detailMapRef.value.leafletObject.invalidateSize();
+      }
+    }, 500);
+  });
 });
 
 const runAIMatch = () => {
@@ -157,56 +173,106 @@ const goToExplore = () => {
   router.push({ name: 'Explore' });
 };
 
-const generatePDF = () => {
-  const doc = new jsPDF();
-  
-  // Background
-  doc.setFillColor(255, 253, 249); // #FFFDF9
-  doc.rect(0, 0, 210, 297, 'F');
-  
-  // Header Box
-  doc.setFillColor(255, 107, 107); // Red
-  doc.rect(10, 10, 190, 40, 'F');
-  doc.setDrawColor(26, 26, 26);
-  doc.setLineWidth(1.5);
-  doc.rect(10, 10, 190, 40, 'D');
-  
-  // Title
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(40);
-  doc.setTextColor(26, 26, 26);
-  doc.text("WANTED!", 105, 38, { align: "center" });
+// Helper function to load image to base64 DataURL (safely bypassing CORS)
+const getBase64ImageFromUrl = (url) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.setAttribute('crossOrigin', 'anonymous');
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL('image/jpeg');
+      resolve(dataURL);
+    };
+    img.onerror = () => {
+      // Fallback tiny gray box
+      resolve('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+    };
+    img.src = url;
+  });
+};
 
-  // Pet Details Box
-  doc.setFillColor(255, 255, 255);
-  doc.rect(20, 60, 170, 100, 'F');
-  doc.rect(20, 60, 170, 100, 'D');
+const generatePDF = async () => {
+  if (!pet.value) return;
   
-  doc.setFontSize(24);
-  doc.text(pet.value.name || 'Hewan Hilang', 105, 80, { align: "center" });
+  const docPdf = new jsPDF();
   
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(16);
-  doc.text(`Jenis: ${pet.value.type}`, 30, 100);
-  doc.text(`Warna: ${pet.value.color}`, 30, 115);
-  doc.text(`Lokasi Terakhir: ${pet.value.lastLocation || pet.value.foundLocation}`, 30, 130);
+  // Background styling
+  docPdf.setFillColor(255, 253, 249); // Cream background
+  docPdf.rect(0, 0, 210, 297, 'F');
   
-  // Description
-  doc.setFontSize(12);
-  const splitDesc = doc.splitTextToSize(`Deskripsi: ${pet.value.description}`, 150);
-  doc.text(splitDesc, 30, 145);
+  // Outer Border
+  docPdf.setDrawColor(0, 0, 0);
+  docPdf.setLineWidth(1.5);
+  docPdf.rect(8, 8, 194, 281, 'D');
 
-  // Footer Box
-  doc.setFillColor(74, 222, 128); // Green
-  doc.rect(20, 180, 170, 40, 'F');
-  doc.rect(20, 180, 170, 40, 'D');
+  // Red Header Box
+  docPdf.setFillColor(255, 107, 107);
+  docPdf.rect(12, 12, 186, 32, 'F');
+  docPdf.rect(12, 12, 186, 32, 'D');
   
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("HUBUNGI SEGERA:", 105, 200, { align: "center" });
-  doc.text(pet.value.contact || 'Melalui Pawpaw Finder App', 105, 210, { align: "center" });
+  docPdf.setFont("helvetica", "bold");
+  docPdf.setFontSize(36);
+  docPdf.setTextColor(0, 0, 0);
+  docPdf.text("WANTED!", 105, 33, { align: "center" });
 
-  doc.save(`WANTED_${pet.value.name || 'Pet'}.pdf`);
+  // Pet Image drawing with base64 DataURL
+  let imgBase64 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  if (pet.value.photo) {
+    imgBase64 = await getBase64ImageFromUrl(pet.value.photo);
+  }
+
+  // Draw photo in center top
+  const imgWidth = 90;
+  const imgHeight = 90;
+  const imgX = (210 - imgWidth) / 2;
+  const imgY = 55;
+  
+  // White card backing for the image
+  docPdf.setFillColor(255, 255, 255);
+  docPdf.rect(imgX - 3, imgY - 3, imgWidth + 6, imgHeight + 6, 'F');
+  docPdf.rect(imgX - 3, imgY - 3, imgWidth + 6, imgHeight + 6, 'D');
+  
+  docPdf.addImage(imgBase64, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+
+  // Pet Details Card
+  const detailsY = 160;
+  docPdf.setFillColor(255, 255, 255);
+  docPdf.rect(15, detailsY, 180, 70, 'F');
+  docPdf.rect(15, detailsY, 180, 70, 'D');
+
+  docPdf.setFont("helvetica", "bold");
+  docPdf.setFontSize(26);
+  docPdf.text(pet.value.name || 'ANONIM', 105, detailsY + 12, { align: "center" });
+
+  docPdf.setFontSize(14);
+  docPdf.text("Ciri-Ciri Hewan:", 22, detailsY + 22);
+  
+  docPdf.setFont("helvetica", "normal");
+  docPdf.setFontSize(12);
+  docPdf.text(`- Jenis Hewan: ${pet.value.type || 'N/A'}`, 22, detailsY + 30);
+  docPdf.text(`- Warna Dominan: ${pet.value.color || 'N/A'}`, 22, detailsY + 37);
+  docPdf.text(`- Lokasi Terakhir: ${pet.value.lastLocation || 'N/A'}`, 22, detailsY + 44);
+  
+  const splitDesc = docPdf.splitTextToSize(`Deskripsi: ${pet.value.description || 'Tidak ada deskripsi.'}`, 160);
+  docPdf.text(splitDesc, 22, detailsY + 52);
+
+  // Contact Footer Box (Green Box)
+  const footerY = 240;
+  docPdf.setFillColor(74, 222, 128); // Green
+  docPdf.rect(15, footerY, 180, 36, 'F');
+  docPdf.rect(15, footerY, 180, 36, 'D');
+
+  docPdf.setFont("helvetica", "bold");
+  docPdf.setFontSize(16);
+  docPdf.text("HUBUNGI SEGERA:", 105, footerY + 12, { align: "center" });
+  docPdf.setFontSize(22);
+  docPdf.text(pet.value.contact || 'Aplikasi Pawpaw Finder', 105, footerY + 26, { align: "center" });
+
+  docPdf.save(`WANTED_${pet.value.name || 'Pet'}.pdf`);
 };
 
 const startChat = async () => {
@@ -221,17 +287,37 @@ const startChat = async () => {
     return;
   }
   
-  // Create or get chat room
-  const chatId = [authStore.user.uid, pet.value.userId].sort().join('_');
+  // Create or get chat room deterministically with pet ID
+  const chatId = `report_${id}_${[authStore.user.uid, pet.value.userId].sort().join('_')}`;
   const chatRef = doc(db, 'chats', chatId);
   
   const snap = await getDoc(chatRef);
   if (!snap.exists()) {
+    let recipientName = 'User';
+    try {
+      const recipientSnap = await getDoc(doc(db, 'users', pet.value.userId));
+      if (recipientSnap.exists()) {
+        recipientName = recipientSnap.data().fullname || 'User';
+      }
+    } catch (err) {
+      console.error("Gagal mengambil profil penerima:", err);
+    }
+
     await setDoc(chatRef, {
       chatId,
       participants: [authStore.user.uid, pet.value.userId],
-      lastMessage: '',
-      updatedAt: serverTimestamp()
+      lastMessage: 'Memulai percakapan...',
+      updatedAt: serverTimestamp(),
+      isAdminChat: false,
+      type: 'report',
+      petId: id,
+      petName: pet.value.name || 'Hewan',
+      petPhoto: pet.value.photo || '',
+      petType: type || 'lost',
+      userNames: {
+        [authStore.user.uid]: authStore.profile?.fullname || 'User',
+        [pet.value.userId]: recipientName
+      }
     });
   }
   
@@ -240,6 +326,14 @@ const startChat = async () => {
 </script>
 
 <style scoped>
+.pet-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
 .grid-detail {
   display: grid;
   grid-template-columns: 1fr;
@@ -258,7 +352,7 @@ const startChat = async () => {
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
   font-weight: 800;
-  border: 3px solid #1A1A1A;
+  border: 3px solid #000000;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -277,10 +371,11 @@ const startChat = async () => {
 }
 
 .neo-detail-item {
-  border: 3px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 3px 3px 0px #1A1A1A;
+  box-shadow: 3px 3px 0px #000000;
+  color: #1A1A1A;
 }
 
 .bg-pink { background-color: #F8BBD0; }
@@ -306,8 +401,8 @@ const startChat = async () => {
 }
 
 .neo-desc-box {
-  background-color: #FFFDF9;
-  border: 3px dashed #1A1A1A;
+  background-color: #1A1A1A;
+  border: 3px dashed #000000;
   border-radius: 12px;
   padding: 1.25rem;
   margin-bottom: 2rem;
@@ -317,7 +412,7 @@ const startChat = async () => {
   display: block;
   font-size: 0.8rem;
   font-weight: 800;
-  color: #555;
+  color: #aaaaaa;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
 }
@@ -326,7 +421,7 @@ const startChat = async () => {
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.6;
-  color: #1A1A1A;
+  color: #FFFFFF;
 }
 
 /* Modal Spesifik */
@@ -334,10 +429,10 @@ const startChat = async () => {
   width: 90%;
   max-width: 450px;
   background-color: #FF8A65;
-  border: 4px solid #1A1A1A;
+  border: 4px solid #000000;
   border-radius: 16px;
   padding: 2.5rem 2rem;
-  box-shadow: 8px 8px 0px #1A1A1A;
+  box-shadow: 8px 8px 0px #000000;
   position: relative;
 }
 
@@ -350,7 +445,7 @@ const startChat = async () => {
   background: none;
   border: none;
   cursor: pointer;
-  color: #1A1A1A;
+  color: #000000;
 }
 .close-btn:hover {
   color: white;

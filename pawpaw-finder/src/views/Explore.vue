@@ -2,8 +2,8 @@
   <div class="explore-container">
     
     <div class="explore-header">
-      <h1 class="explore-title">Katalog Hewan</h1>
-      <button class="btn-neo" @click="router.push({ name: 'Dashboard' })">Ke Dashboard</button>
+      <h1 class="explore-title">{{ langStore.t('searchPet') }}</h1>
+      <button class="btn-neo" @click="router.push({ name: 'Dashboard' })">{{ langStore.t('dashboard') }}</button>
     </div>
 
     <!-- Filters -->
@@ -63,11 +63,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePetStore } from '../stores/petStore';
+import { useLangStore } from '../stores/lang';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
 import EmptyState from '../components/EmptyState.vue';
 
 const router = useRouter();
 const petStore = usePetStore();
+const langStore = useLangStore();
 
 const tab = ref('lost');
 const searchQuery = ref('');
@@ -125,7 +127,7 @@ const goToDetail = (pet) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin: 0;
 }
 
@@ -134,10 +136,10 @@ const goToDetail = (pet) => {
   font-weight: 800;
   padding: 0.75rem 1.5rem;
   background-color: #FF8A65;
-  color: #FFFDF9;
-  border: 3px solid #1A1A1A;
+  color: #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
-  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
@@ -145,7 +147,7 @@ const goToDetail = (pet) => {
 
 .btn-neo:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-neo:active {
@@ -163,11 +165,11 @@ const goToDetail = (pet) => {
 
 /* Filters */
 .filter-card {
-  background-color: #FFFDF9;
-  border: 4px solid #1A1A1A;
+  background-color: var(--color-card-bg);
+  border: 3px solid #000000;
   border-radius: 24px;
   padding: 1.5rem;
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   margin-bottom: 3rem;
 }
 
@@ -179,19 +181,20 @@ const goToDetail = (pet) => {
 
 .neo-input {
   padding: 0.75rem 1rem;
-  background-color: white;
-  border: 3px solid #1A1A1A;
+  background-color: #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
   font-weight: 700;
   font-family: 'Nunito', sans-serif;
   font-size: 1rem;
+  color: #FFFFFF;
   outline: none;
   transition: all 0.2s;
 }
 
 .neo-input:focus {
   border-color: #FF8A65;
-  box-shadow: 0 0 0 4px rgba(255, 138, 101, 0.2);
+  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .search-input {
@@ -212,13 +215,13 @@ const goToDetail = (pet) => {
 
 /* Pet Card */
 .pet-card {
-  background-color: #FFFDF9;
-  border: 4px solid #1A1A1A;
+  background-color: var(--color-card-bg);
+  border: 3px solid #000000;
   border-radius: 24px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   cursor: pointer;
   transition: all 0.2s;
   height: 100%;
@@ -226,14 +229,14 @@ const goToDetail = (pet) => {
 
 .pet-card:hover {
   transform: translateY(-4px);
-  box-shadow: 6px 10px 0px 0px #1A1A1A;
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .img-wrapper {
   height: 250px;
   width: 100%;
-  border-bottom: 4px solid #1A1A1A;
-  background-color: #f3f4f6;
+  border-bottom: 3px solid #000000;
+  background-color: #1A1A1A;
   overflow: hidden;
 }
 
@@ -262,7 +265,7 @@ const goToDetail = (pet) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin: 0;
   word-break: break-word;
 }
@@ -272,16 +275,16 @@ const goToDetail = (pet) => {
   border-radius: 8px;
   font-size: 0.75rem;
   font-weight: 800;
-  border: 2px solid #1A1A1A;
+  border: 2px solid #000000;
   white-space: nowrap;
 }
 
-.bg-orange { background-color: #FF8A65; color: #FFFDF9; }
+.bg-orange { background-color: #FF8A65; color: #1A1A1A; }
 .bg-green { background-color: #4ADE80; color: #1A1A1A; }
 
 .pet-info {
   font-size: 1rem;
-  color: #555;
+  color: #aaaaaa;
   margin: 0 0 0.5rem 0;
 }
 

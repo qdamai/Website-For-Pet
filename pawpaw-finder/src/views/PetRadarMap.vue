@@ -2,10 +2,10 @@
   <div class="radar-page h-[calc(100vh-100px)] flex flex-col">
     <div class="radar-header">
       <div class="flex items-center gap-4">
-        <button class="btn-neo bg-white text-black" @click="router.back()">Kembali</button>
-        <h1 class="page-title">Pet Radar Map 🗺️</h1>
+        <button class="btn-neo bg-white text-black" @click="router.back()">{{ langStore.t('back') }}</button>
+        <h1 class="page-title">{{ langStore.t('radarMap') }}</h1>
       </div>
-      <button class="btn-neo bg-blue" @click="locateUser">📍 Lokasi Saya</button>
+      <button class="btn-neo bg-blue" @click="locateUser(false)">Lokasi Saya</button>
     </div>
 
     <div class="map-container">
@@ -19,6 +19,7 @@
         v-model:zoom="zoom" 
         :center="center" 
         :useGlobalLeaflet="false"
+        style="height: 100%; width: 100%; z-index: 1;"
       >
         <l-tile-layer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -74,16 +75,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { useLangStore } from '../stores/lang';
 
 import 'leaflet/dist/leaflet.css';
 import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet';
 import L from 'leaflet';
 
 const router = useRouter();
+const langStore = useLangStore();
 
 const zoom = ref(13);
 const center = ref([-0.947083, 100.351111]); // Default to Padang
@@ -94,10 +97,10 @@ const foundPets = ref([]);
 const loading = ref(true);
 const userLocation = ref(null);
 
-// Custom Icons
+// Custom Icons using raw githubusercontent (stable and reliable)
 const createIcon = (color) => {
   return L.icon({
-    iconUrl: `https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -106,13 +109,22 @@ const createIcon = (color) => {
   });
 };
 
-const iconLost = createIcon('red');
+const iconLost = createIcon('orange');
 const iconFound = createIcon('green');
 const iconUser = createIcon('blue');
 
 onMounted(async () => {
   await fetchData();
-  // Attempt to locate user silently on load
+  
+  // Wait for map container to fully render then invalidate Leaflet size
+  nextTick(() => {
+    setTimeout(() => {
+      if (mapRef.value && mapRef.value.leafletObject) {
+        mapRef.value.leafletObject.invalidateSize();
+      }
+    }, 500);
+  });
+
   locateUser(true);
 });
 
@@ -148,10 +160,21 @@ const locateUser = (silent = false) => {
         center.value = userLocation.value;
         zoom.value = 15;
         if (!silent) loading.value = false;
+        
+        nextTick(() => {
+          if (mapRef.value && mapRef.value.leafletObject) {
+            mapRef.value.leafletObject.invalidateSize();
+          }
+        });
       },
       (err) => {
-        if (!silent) alert('Gagal mendeteksi lokasi GPS Anda.');
+        if (!silent) alert('Gagal mendeteksi lokasi GPS Anda (Mungkin timeout atau ditolak).');
         if (!silent) loading.value = false;
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       }
     );
   } else {
@@ -170,6 +193,7 @@ const goToDetail = (type, id) => {
   margin: 0 auto;
   padding: 1rem;
   font-family: 'Nunito', sans-serif;
+  background-color: var(--color-bg);
 }
 
 .radar-header {
@@ -183,24 +207,25 @@ const goToDetail = (type, id) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2rem;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin: 0;
 }
 
 .map-container {
   flex: 1;
-  border: 4px solid #1A1A1A;
+  min-height: 500px;
+  border: 3px solid #000000;
   border-radius: 24px;
-  box-shadow: 8px 8px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   overflow: hidden;
   position: relative;
-  z-index: 0; /* Leaflet layering fix */
+  z-index: 0;
 }
 
 .map-loading {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(255,255,255,0.9);
+  background-color: rgba(18,18,18,0.9);
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -209,15 +234,16 @@ const goToDetail = (type, id) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
+  color: #FFFFFF;
 }
 
 .btn-neo {
   font-family: 'Fredoka', sans-serif;
   font-weight: 800;
   padding: 0.5rem 1rem;
-  border: 3px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
-  box-shadow: 3px 3px 0px 0px #1A1A1A;
+  box-shadow: 3px 3px 0px 0px #000000;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
@@ -239,13 +265,14 @@ const goToDetail = (type, id) => {
   align-items: center;
   text-align: center;
   width: 150px;
+  color: #1A1A1A;
 }
 
 .popup-img {
   width: 100px;
   height: 100px;
   object-fit: cover;
-  border: 3px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 50%;
   margin-bottom: 0.5rem;
 }
@@ -261,6 +288,7 @@ const goToDetail = (type, id) => {
   font-size: 0.8rem;
   font-weight: 700;
   margin: 0.25rem 0 0.5rem 0;
+  color: #555555;
 }
 
 .badge {
@@ -268,7 +296,7 @@ const goToDetail = (type, id) => {
   font-weight: 800;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  border: 2px solid #1A1A1A;
+  border: 2px solid #000000;
   margin-bottom: 0.5rem;
 }
 
@@ -277,18 +305,21 @@ const goToDetail = (type, id) => {
   padding: 0.4rem;
   font-size: 0.85rem;
   background-color: #FF8A65;
-  color: white;
+  color: #1A1A1A;
+  box-shadow: 2px 2px 0px #000000;
 }
 
 /* Fix Leaflet default popup override */
 :deep(.leaflet-popup-content-wrapper) {
-  border: 4px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 16px;
-  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
+  background-color: #FFFFFF;
 }
 :deep(.leaflet-popup-tip) {
-  border: 4px solid #1A1A1A;
+  border: 3px solid #000000;
   border-top: none;
   border-left: none;
+  background-color: #FFFFFF;
 }
 </style>

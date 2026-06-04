@@ -1,13 +1,15 @@
+@import "tailwindcss";
+
 :root {
-  --color-bg: #121212; /* Dark Background */
-  --color-primary: #FF8A65; /* Pastel Orange/Coral */
-  --color-success: #4ADE80; /* Mint Green */
-  --color-accent-1: #B39DDB; /* Soft Lavender */
-  --color-accent-2: #FFF176; /* Lemon Yellow */
-  --color-text: #FFFFFF; /* White text for contrast */
-  --color-text-dark: #1A1A1A; /* Dark text for light containers */
-  --color-border: #FFFFFF;
-  --color-border-dark: #1A1A1A;
+  --color-bg: #121212;
+  --color-card-bg: #262626;
+  --color-primary: #FF8A65;
+  --color-success: #4ADE80;
+  --color-accent-1: #B39DDB;
+  --color-accent-2: #FFF176;
+  --color-text: #FFFFFF;
+  --color-text-dark: #1A1A1A;
+  --color-border: #000000;
   
   --border-width: 3px;
   --radius-sm: 12px;
@@ -15,11 +17,9 @@
   --radius-lg: 24px;
   --radius-full: 9999px;
   
-  --shadow-neo: 4px 4px 0px #FFFFFF;
-  --shadow-neo-hover: 6px 6px 0px #FFFFFF;
-  --shadow-neo-active: 2px 2px 0px #FFFFFF;
-  
-  --shadow-neo-dark: 4px 4px 0px #1A1A1A;
+  --shadow-neo: 4px 4px 0px #000000;
+  --shadow-neo-hover: 6px 6px 0px #000000;
+  --shadow-neo-active: 2px 2px 0px #000000;
 }
 
 * {
@@ -38,7 +38,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 0.5rem;
 }
 
@@ -62,15 +62,25 @@ input, textarea, button, select {
   padding: 0.75rem 1rem;
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: #262626;
+  background-color: var(--color-card-bg);
   color: var(--color-text);
   transition: all 0.2s ease-in-out;
   outline: none;
+  font-weight: 700;
 }
 
 .neo-input:focus {
   box-shadow: var(--shadow-neo);
   transform: translate(-2px, -2px);
+}
+
+/* Fix Chrome Autofill in Dark Mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px var(--color-card-bg) inset !important;
+    -webkit-text-fill-color: var(--color-text) !important;
 }
 
 /* Layout utilities */
@@ -113,7 +123,7 @@ input, textarea, button, select {
 .neo-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(18, 18, 18, 0.85);
+  background: rgba(18, 18, 18, 0.95);
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
