@@ -4,15 +4,15 @@
     <!-- Header -->
     <div class="dashboard-header">
       <div>
-        <h1 class="header-title">Halo, {{ authStore.profile?.fullname || 'Pawpawer' }}!</h1>
-        <p class="header-subtitle">Selamat datang di Pawpaw Finder.</p>
+        <h1 class="header-title">{{ langStore.t('welcome') }}, {{ authStore.profile?.fullname || 'User' }}!</h1>
+        <p class="header-subtitle">{{ langStore.t('subtitle') }}</p>
       </div>
       <div class="header-actions">
         <button v-if="authStore.isAdmin" class="btn-admin" @click="router.push({ name: 'AdminPanel' })">
-          Admin Panel
+          {{ langStore.t('admin') }}
         </button>
         <button class="btn-logout" @click="handleLogout">
-          Keluar
+          {{ langStore.t('logout') }}
         </button>
       </div>
     </div>
@@ -21,66 +21,71 @@
     <div class="stats-grid">
       <div class="stat-card bg-yellow">
         <h3 class="stat-number">124</h3>
-        <p class="stat-label">Laporan Aktif</p>
+        <p class="stat-label">{{ langStore.t('activeReports') }}</p>
       </div>
       <div class="stat-card bg-green">
         <h3 class="stat-number">87</h3>
-        <p class="stat-label">Berhasil Diselamatkan</p>
+        <p class="stat-label">{{ langStore.t('successSaved') }}</p>
       </div>
       <div class="stat-card bg-purple">
         <h3 class="stat-number">70%</h3>
-        <p class="stat-label">Tingkat Keberhasilan</p>
+        <p class="stat-label">{{ langStore.t('successRate') }}</p>
       </div>
     </div>
 
     <!-- Quick Actions -->
-    <h2 class="section-title">Aksi Cepat</h2>
+    <h2 class="section-title">{{ langStore.t('quickActions') }}</h2>
     <div class="actions-grid">
       
       <div class="action-card" @click="router.push({ name: 'ReportForm', query: { type: 'lost' } })">
         <div class="icon-circle bg-orange">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         </div>
-        <h3 class="action-title">Lapor Hewan Hilang</h3>
+        <h3 class="action-title">{{ langStore.t('reportLost') }}</h3>
       </div>
       
       <div class="action-card" @click="router.push({ name: 'ReportForm', query: { type: 'found' } })">
         <div class="icon-circle bg-green">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
-        <h3 class="action-title">Lapor Hewan Ditemukan</h3>
+        <h3 class="action-title">{{ langStore.t('reportFound') }}</h3>
       </div>
 
       <div class="action-card" @click="router.push({ name: 'Explore' })">
         <div class="icon-circle bg-purple">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         </div>
-        <h3 class="action-title">Eksplorasi Katalog</h3>
+        <h3 class="action-title">{{ langStore.t('exploreCatalog') }}</h3>
       </div>
 
       <div class="action-card" @click="router.push({ name: 'PetRadarMap' })">
         <div class="icon-circle bg-yellow">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
         </div>
-        <h3 class="action-title">Radar Peta (Live)</h3>
+        <h3 class="action-title">{{ langStore.t('radarMap') }}</h3>
       </div>
 
-      <!-- NEW: Bantuan Cepat -->
-      <div class="action-card" @click="startAdminChat">
+      <div v-if="!authStore.isAdmin" class="action-card" @click="startAdminChat">
         <div class="icon-circle bg-blue">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         </div>
-        <h3 class="action-title">Bantuan Cepat (Chat Admin)</h3>
+        <h3 class="action-title">{{ langStore.t('quickHelp') }}</h3>
+      </div>
+      <div v-else class="action-card" @click="router.push({ name: 'LiveChat' })">
+        <div class="icon-circle bg-blue">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <h3 class="action-title">Live Chat</h3>
       </div>
 
     </div>
 
-    <!-- Deep Link Gateway -->
+    <!-- Adoption Banner -->
     <div class="adoption-banner bg-blue">
-      <h3 class="banner-title">Ingin Mengadopsi Teman Baru?</h3>
-      <p class="banner-subtitle">Kunjungi portal adopsi resmi kami untuk menemukan anabul impianmu.</p>
-      <a href="https://example.com/pawpaw-adopt" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-        <button class="btn-adopt">Buka Pawpaw Adopt</button>
+      <h3 class="banner-title">Ingin Memelihara Hewan?</h3>
+      <p class="banner-subtitle">{{ langStore.t('adoptSub') }}</p>
+      <a :href="adoptionUrl" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+        <button class="btn-adopt">{{ langStore.t('adoptBtn') }}</button>
       </a>
     </div>
 
@@ -90,11 +95,15 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useLangStore } from '../stores/lang';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const langStore = useLangStore();
+
+const adoptionUrl = import.meta.env.VITE_ADOPTION_URL || 'https://pawpaw-adopt.netlify.app';
 
 const handleLogout = async () => {
   await authStore.logout();
@@ -104,8 +113,6 @@ const handleLogout = async () => {
 const startAdminChat = async () => {
   if (!authStore.user) return;
   
-  // Admin UID placeholder or specific ID. 
-  // In a real app, query for an admin user. For now, we'll use a virtual 'admin_support' ID.
   const adminId = 'admin_support_pawpaw';
   const chatId = `support_${authStore.user.uid}`;
   
@@ -118,7 +125,10 @@ const startAdminChat = async () => {
       participants: [authStore.user.uid, adminId],
       lastMessage: 'Memulai sesi bantuan...',
       updatedAt: serverTimestamp(),
-      isAdminChat: true
+      isAdminChat: true,
+      type: 'support',
+      userName: authStore.profile?.fullname || 'User',
+      userEmail: authStore.profile?.email || ''
     });
   }
   
@@ -132,7 +142,7 @@ const startAdminChat = async () => {
   margin: 0 auto;
   padding: 2rem;
   font-family: 'Nunito', sans-serif;
-  background-color: var(--color-bg, #FFFDF9);
+  background-color: var(--color-bg);
   min-height: 100vh;
 }
 
@@ -150,14 +160,14 @@ const startAdminChat = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin: 0 0 0.25rem 0;
 }
 
 .header-subtitle {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #555;
+  color: #aaaaaa;
   margin: 0;
 }
 
@@ -170,9 +180,9 @@ const startAdminChat = async () => {
   font-family: 'Fredoka', 'Nunito', sans-serif;
   font-weight: 800;
   padding: 0.75rem 1.5rem;
-  border: 3px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
-  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
@@ -184,7 +194,7 @@ const startAdminChat = async () => {
 
 .btn-admin:hover, .btn-logout:hover, .btn-adopt:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .btn-admin:active, .btn-logout:active, .btn-adopt:active {
@@ -202,14 +212,14 @@ const startAdminChat = async () => {
 
 /* Stat Cards */
 .stat-card {
-  border: 4px solid #1A1A1A;
-  border-radius: 9999px; /* Pill shape */
+  border: 3px solid #000000;
+  border-radius: 9999px;
   padding: 2.5rem 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   text-align: center;
 }
 
@@ -236,56 +246,56 @@ const startAdminChat = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2rem;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin-bottom: 1.5rem;
 }
 
 /* Action Cards */
 .action-card {
-  background-color: #FFFDF9;
-  border: 4px solid #1A1A1A;
+  background-color: var(--color-card-bg);
+  border: 3px solid #000000;
   border-radius: 24px;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .action-card:hover {
   transform: translateY(-4px);
-  box-shadow: 6px 10px 0px 0px #1A1A1A;
+  box-shadow: 6px 6px 0px 0px #000000;
 }
 
 .icon-circle {
   width: 72px;
   height: 72px;
-  border: 4px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  box-shadow: 3px 3px 0px 0px #000000;
 }
 
 .action-title {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin: 0;
 }
 
 /* Banner */
 .adoption-banner {
-  border: 4px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 32px;
   padding: 3rem 2rem;
   text-align: center;
-  box-shadow: 8px 8px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   margin-top: 1rem;
 }
 

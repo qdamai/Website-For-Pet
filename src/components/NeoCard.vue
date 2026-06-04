@@ -23,7 +23,7 @@ const handleClick = (e) => {
 
 <style scoped>
 .neo-card {
-  background-color: #ffffff;
+  background-color: var(--color-card-bg);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 1.5rem;

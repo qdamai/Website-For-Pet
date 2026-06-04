@@ -59,6 +59,11 @@
         Mulai Sekarang!
       </button>
 
+      <!-- Adoption CTA Button -->
+      <a :href="adoptionUrl" target="_blank" rel="noopener noreferrer" class="adoption-cta-button">
+        Adopsi Hewan
+      </a>
+
     </div>
   </div>
 </template>
@@ -67,6 +72,8 @@
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+const adoptionUrl = import.meta.env.VITE_ADOPTION_URL || 'https://pawpaw-adopt.netlify.app';
 
 const goToAuth = () => {
   router.push({ name: 'Auth' });
@@ -225,5 +232,37 @@ const goToAuth = () => {
   .splash-title {
     font-size: 2rem;
   }
+}
+
+.adoption-cta-button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  padding: 1rem 1.5rem;
+  background-color: #B39DDB; /* Purple */
+  border: 4px solid #1A1A1A;
+  border-radius: 16px;
+  color: #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+  margin-top: 1rem;
+}
+
+.adoption-cta-button:hover {
+  background-color: #D1C4E9;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #1A1A1A;
+}
+
+.adoption-cta-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 </style>

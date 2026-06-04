@@ -2,28 +2,70 @@
   <div class="chat-wrapper">
     
     <div class="chat-header-main">
-      <h1 class="chat-title">Live Chat Pawpaw 💬</h1>
-      <button class="btn-neo" @click="router.back()">Kembali</button>
+      <h1 class="chat-title">{{ langStore.t('chats') }}</h1>
+      <button class="btn-neo" @click="router.back()">{{ langStore.t('back') }}</button>
     </div>
 
     <div class="chat-layout">
       <!-- Chat List Sidebar -->
       <div class="chat-sidebar">
-        <h2 class="sidebar-title">Pesan Masuk</h2>
+        <h2 class="sidebar-title">{{ langStore.t('chats') }}</h2>
+        
+        <div class="chat-tabs">
+          <button 
+            class="tab-btn" 
+            :class="{ 'active': activeTab === 'support' }"
+            @click="activeTab = 'support'"
+          >
+            {{ authStore.isAdmin ? 'Support Tickets' : 'Bantuan' }}
+          </button>
+          <button 
+            class="tab-btn" 
+            :class="{ 'active': activeTab === 'report' }"
+            @click="activeTab = 'report'"
+          >
+            Info Laporan
+          </button>
+          <button 
+            class="tab-btn" 
+            :class="{ 'active': activeTab === 'peer' }"
+            @click="activeTab = 'peer'"
+          >
+            Pesan Pribadi
+          </button>
+        </div>
         
         <div class="chat-list">
-          <div v-if="chatList.length === 0" class="empty-list">
-            Belum ada percakapan.
+          <div v-if="filteredChats.length === 0" class="empty-list">
+            {{ langStore.t('noConversations') }}
           </div>
           <div 
-            v-for="chat in chatList" 
+            v-for="chat in filteredChats" 
             :key="chat.chatId"
             class="chat-item"
             :class="{ 'active': currentRoom === chat.chatId }"
             @click="selectRoom(chat.chatId)"
           >
-            <div class="chat-item-name">{{ getOtherParticipantName(chat) }}</div>
-            <div class="chat-item-last">{{ chat.lastMessage || '...' }}</div>
+            <div class="chat-item-content">
+              <!-- Thumbnail for pet photo if it's a report chat -->
+              <img 
+                v-if="(chat.type === 'report' || chat.petId) && chat.petPhoto" 
+                :src="chat.petPhoto" 
+                alt="Pet Thumbnail" 
+                class="chat-pet-thumb"
+              />
+              <div v-else-if="chat.type === 'report' || chat.petId" class="chat-pet-thumb-fallback bg-orange">
+                🐾
+              </div>
+              
+              <div class="chat-item-text">
+                <div class="chat-item-name">{{ getOtherParticipantName(chat) }}</div>
+                <div class="chat-item-pet" v-if="chat.type === 'report' || chat.petId">
+                  Hewan: {{ chat.petName || 'Laporan' }}
+                </div>
+                <div class="chat-item-last">{{ chat.lastMessage || '...' }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -32,8 +74,19 @@
       <div class="chat-area">
         <template v-if="currentRoom">
           <div class="room-header">
-            <h3 class="room-title">Ruang Obrolan: {{ currentChatName }}</h3>
-            <button class="btn-wa" @click="moveToWhatsApp">📱 Pindah ke WA</button>
+            <div class="room-header-info">
+              <h3 class="room-title">{{ langStore.t('roomChat') }}: {{ currentChatName }}</h3>
+              <div v-if="currentRoomDetails?.type === 'report' || currentRoomDetails?.petId" class="room-subtitle-pet">
+                Membahas Hewan: 
+                <router-link 
+                  :to="`/pet/${currentRoomDetails.petType || 'lost'}/${currentRoomDetails.petId}`" 
+                  class="pet-link"
+                >
+                  {{ currentRoomDetails.petName || 'Detail Hewan' }}
+                </router-link>
+              </div>
+            </div>
+            <button class="btn-wa" @click="moveToWhatsApp">{{ langStore.t('moveToWA') }}</button>
           </div>
           
           <div class="messages-container" ref="messagesContainer">
@@ -55,14 +108,14 @@
               v-model="newMessage" 
               type="text" 
               class="neo-input" 
-              placeholder="Ketik pesan..." 
+              :placeholder="langStore.t('typeMessage')" 
               required
             >
-            <button type="submit" class="btn-neo btn-send">Kirim</button>
+            <button type="submit" class="btn-neo btn-send">{{ langStore.t('send') }}</button>
           </form>
         </template>
         <div v-else class="empty-room">
-          <EmptyState title="Pilih Percakapan" description="Klik pada salah satu obrolan di samping untuk mulai membalas." />
+          <EmptyState :title="langStore.t('selectConversation')" :description="langStore.t('selectConversationDesc')" type="chat" />
         </div>
       </div>
     </div>
@@ -73,19 +126,23 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { collection, query, where, onSnapshot, orderBy, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { useLangStore } from '../stores/lang';
+import { collection, query, where, or, onSnapshot, orderBy, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import EmptyState from '../components/EmptyState.vue';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const langStore = useLangStore();
 
 const chatList = ref([]);
 const messages = ref([]);
 const currentRoom = ref(route.query.room || null);
 const newMessage = ref('');
 const messagesContainer = ref(null);
+
+const activeTab = ref('support'); // 'support', 'peer', 'report'
 
 let unsubChatList = null;
 let unsubMessages = null;
@@ -94,6 +151,13 @@ onMounted(() => {
   if (authStore.user) {
     loadChatList();
     if (currentRoom.value) {
+      if (currentRoom.value.startsWith('support_')) {
+        activeTab.value = 'support';
+      } else if (currentRoom.value.startsWith('report_')) {
+        activeTab.value = 'report';
+      } else {
+        activeTab.value = 'peer';
+      }
       selectRoom(currentRoom.value);
     }
   }
@@ -105,10 +169,23 @@ onUnmounted(() => {
 });
 
 const loadChatList = () => {
-  const q = query(
-    collection(db, 'chats'),
-    where('participants', 'array-contains', authStore.user.uid)
-  );
+  let q;
+  if (authStore.isAdmin) {
+    // Admin sees all support chats + any chats they are participants of
+    q = query(
+      collection(db, 'chats'),
+      or(
+        where('isAdminChat', '==', true),
+        where('participants', 'array-contains', authStore.user.uid)
+      )
+    );
+  } else {
+    // User sees chats they are participants of
+    q = query(
+      collection(db, 'chats'),
+      where('participants', 'array-contains', authStore.user.uid)
+    );
+  }
 
   unsubChatList = onSnapshot(q, (snapshot) => {
     chatList.value = snapshot.docs.map(d => ({ ...d.data() }));
@@ -120,16 +197,43 @@ const loadChatList = () => {
   });
 };
 
+const filteredChats = computed(() => {
+  return chatList.value.filter(chat => {
+    const isSupport = chat.type === 'support' || chat.isAdminChat === true;
+    const isReport = chat.type === 'report' || (chat.petId !== undefined && chat.petId !== null);
+    const isPeer = chat.type === 'peer' || (!isSupport && !isReport);
+    
+    if (activeTab.value === 'support') return isSupport;
+    if (activeTab.value === 'peer') return isPeer;
+    if (activeTab.value === 'report') return isReport;
+    return false;
+  });
+});
+
 const getOtherParticipantName = (chat) => {
-  if (chat.isAdminChat) return "Admin Support";
+  if (chat.isAdminChat || chat.type === 'support') {
+    if (authStore.isAdmin) {
+      return chat.userName || 'User';
+    } else {
+      return "Admin Support";
+    }
+  }
+  if (chat.userNames) {
+    const otherId = chat.participants.find(id => id !== authStore.user.uid);
+    return chat.userNames[otherId] || `User (${otherId?.substring(0, 5)})`;
+  }
   const otherId = chat.participants.find(id => id !== authStore.user.uid);
-  return `User (${otherId.substring(0, 5)})`;
+  return `User (${otherId ? otherId.substring(0, 5) : 'Unknown'})`;
 };
 
 const currentChatName = computed(() => {
   const chat = chatList.value.find(c => c.chatId === currentRoom.value);
   if (chat) return getOtherParticipantName(chat);
   return 'Loading...';
+});
+
+const currentRoomDetails = computed(() => {
+  return chatList.value.find(c => c.chatId === currentRoom.value) || null;
 });
 
 const selectRoom = (chatId) => {
@@ -186,7 +290,7 @@ const moveToWhatsApp = () => {
   margin: 0 auto;
   padding: 2rem;
   font-family: 'Nunito', sans-serif;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 100px);
   display: flex;
   flex-direction: column;
 }
@@ -202,7 +306,7 @@ const moveToWhatsApp = () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1A1A1A;
+  color: #FFFFFF;
   margin: 0;
 }
 
@@ -210,18 +314,18 @@ const moveToWhatsApp = () => {
   display: flex;
   gap: 1.5rem;
   flex: 1;
-  min-height: 0; /* Important for scroll */
+  min-height: 0;
 }
 
 /* Sidebar */
 .chat-sidebar {
   width: 30%;
-  background-color: #FFFDF9;
-  border: 4px solid #1A1A1A;
+  background-color: var(--color-card-bg);
+  border: 3px solid #000000;
   border-radius: 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   overflow: hidden;
 }
 
@@ -231,8 +335,9 @@ const moveToWhatsApp = () => {
   font-weight: 800;
   margin: 0;
   padding: 1.5rem;
-  border-bottom: 4px solid #1A1A1A;
-  background-color: #F3E5F5;
+  border-bottom: 3px solid #000000;
+  background-color: #B39DDB;
+  color: #1A1A1A;
 }
 
 .chat-list {
@@ -244,33 +349,30 @@ const moveToWhatsApp = () => {
 .empty-list {
   text-align: center;
   font-weight: 700;
-  color: #666;
+  color: #888888;
   padding: 2rem 0;
 }
 
 .chat-item {
-  border: 3px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
   cursor: pointer;
-  background-color: white;
+  background-color: #1A1A1A;
+  color: #FFFFFF;
   transition: all 0.2s;
-  box-shadow: 3px 3px 0px 0px #1A1A1A;
+  box-shadow: 3px 3px 0px 0px #000000;
 }
 
 .chat-item:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px 0px #1A1A1A;
+  box-shadow: 5px 5px 0px 0px #000000;
 }
 
 .chat-item.active {
-  background-color: #1A1A1A;
-  color: #FFFDF9;
-}
-
-.chat-item.active .chat-item-last {
-  color: #bbb;
+  background-color: #FFF176;
+  color: #1A1A1A;
 }
 
 .chat-item-name {
@@ -282,21 +384,25 @@ const moveToWhatsApp = () => {
 .chat-item-last {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #555;
+  color: #aaaaaa;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.chat-item.active .chat-item-last {
+  color: #333333;
+}
+
 /* Chat Area */
 .chat-area {
   width: 70%;
-  background-color: #FFFDF9;
-  border: 4px solid #1A1A1A;
+  background-color: var(--color-card-bg);
+  border: 3px solid #000000;
   border-radius: 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 6px 6px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   overflow: hidden;
 }
 
@@ -305,14 +411,15 @@ const moveToWhatsApp = () => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 4px solid #1A1A1A;
-  background-color: white;
+  border-bottom: 3px solid #000000;
+  background-color: #1A1A1A;
 }
 
 .room-title {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
+  color: #FFFFFF;
   margin: 0;
 }
 
@@ -321,10 +428,10 @@ const moveToWhatsApp = () => {
   color: white;
   font-weight: 800;
   padding: 0.5rem 1rem;
-  border: 3px solid #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 3px 3px 0px 0px #1A1A1A;
+  box-shadow: 3px 3px 0px 0px #000000;
   transition: all 0.2s;
 }
 
@@ -340,16 +447,17 @@ const moveToWhatsApp = () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background-color: #f9f9f9;
+  background-color: #121212;
 }
 
 .message-bubble {
   max-width: 75%;
   padding: 1rem;
-  border: 3px solid #1A1A1A;
-  box-shadow: 3px 3px 0px 0px #1A1A1A;
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0px 0px #000000;
   font-weight: 700;
   font-size: 1rem;
+  color: #1A1A1A;
 }
 
 .my-message {
@@ -360,7 +468,7 @@ const moveToWhatsApp = () => {
 
 .their-message {
   align-self: flex-start;
-  background-color: white;
+  background-color: #FFFFFF;
   border-radius: 16px 16px 16px 0;
 }
 
@@ -375,23 +483,8 @@ const moveToWhatsApp = () => {
   display: flex;
   padding: 1.5rem;
   gap: 1rem;
-  border-top: 4px solid #1A1A1A;
-  background-color: white;
-}
-
-.neo-input {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 3px solid #1A1A1A;
-  border-radius: 12px;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  outline: none;
-}
-
-.neo-input:focus {
-  border-color: #FF8A65;
+  border-top: 3px solid #000000;
+  background-color: #1A1A1A;
 }
 
 .btn-neo {
@@ -399,10 +492,10 @@ const moveToWhatsApp = () => {
   font-weight: 800;
   padding: 0.75rem 1.5rem;
   background-color: #FF8A65;
-  color: #FFFDF9;
-  border: 3px solid #1A1A1A;
+  color: #1A1A1A;
+  border: 3px solid #000000;
   border-radius: 12px;
-  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  box-shadow: 4px 4px 0px 0px #000000;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
@@ -418,12 +511,110 @@ const moveToWhatsApp = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f9f9f9;
+  background-color: #121212;
+}
+
+.chat-tabs {
+  display: flex;
+  border-bottom: 3px solid #000000;
+  background-color: #1A1A1A;
+}
+
+.chat-tabs .tab-btn {
+  flex: 1;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 0.75rem 0.25rem;
+  border: none;
+  background: transparent;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-right: 2px solid #000000;
+}
+
+.chat-tabs .tab-btn:last-child {
+  border-right: none;
+}
+
+.chat-tabs .tab-btn:hover {
+  background-color: #333333;
+}
+
+.chat-tabs .tab-btn.active {
+  background-color: #FFF176;
+  color: #1A1A1A;
+}
+
+.chat-item-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chat-pet-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.chat-pet-thumb-fallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.chat-item-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-item-pet {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #B39DDB;
+  margin-bottom: 0.25rem;
+}
+
+.chat-item.active .chat-item-pet {
+  color: #5E35B1;
+}
+
+.room-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.room-subtitle-pet {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #aaaaaa;
+}
+
+.pet-link {
+  color: #FFF176;
+  text-decoration: underline;
+  font-weight: 800;
+}
+
+.pet-link:hover {
+  color: #4ADE80;
 }
 
 @media (max-width: 768px) {
   .chat-layout { flex-direction: column; }
-  .chat-sidebar { width: 100%; height: 250px; flex: none; }
+  .chat-sidebar { width: 100%; height: 350px; flex: none; }
   .chat-area { width: 100%; flex: 1; min-height: 400px; }
 }
 </style>
