@@ -17,7 +17,7 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card v-for="pet in store.foundPets" :key="pet.id" class="p-0 overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow">
-          <div class="h-48 bg-[#dcfce7] bg-cover bg-center" :style="{ backgroundImage: `url(${pet.image})` }">
+          <div class="h-48 bg-[#dcfce7] bg-cover bg-center" :style="{ backgroundImage: `url(${pet.photo || getPetFallbackImage(pet.type)})` }">
           </div>
           <div class="p-5">
             <div class="flex justify-between items-start mb-2">
@@ -25,7 +25,7 @@
               <span class="bg-[#dcfce7] text-[#166534] text-xs font-bold px-3 py-1 rounded-full">{{ pet.status }}</span>
             </div>
             <p class="text-sm text-[#64748b] mb-2 font-medium">{{ pet.type }} • {{ pet.color }}</p>
-            <p class="text-sm font-semibold text-[#475569] mb-4">📍 {{ pet.location }}</p>
+            <p class="text-sm font-semibold text-[#475569] mb-4">📍 {{ pet.location || pet.foundLocation }}</p>
             
             <Button variant="white" block size="sm" @click="$router.push(`/pet/found/${pet.id}`)">Lihat Detail</Button>
           </div>
@@ -37,6 +37,7 @@
 
 <script setup>
 import { usePetStore } from '../stores/petStore'
+import { getPetFallbackImage } from '../utils/helpers'
 import Card from '../components/ui/Card.vue'
 import Button from '../components/ui/Button.vue'
 import Input from '../components/ui/Input.vue'

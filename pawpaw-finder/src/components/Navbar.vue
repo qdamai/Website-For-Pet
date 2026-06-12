@@ -23,9 +23,17 @@
         <router-link to="/chat" class="nav-item" @click="closeMobileMenu">
           {{ langStore.t('chat') }}
         </router-link>
-        <a :href="adoptionUrl" target="_blank" rel="noopener noreferrer" class="nav-item" @click="closeMobileMenu">
+        <router-link to="/adoption" class="nav-item" @click="closeMobileMenu">
           {{ langStore.t('adoption') }}
-        </a>
+        </router-link>
+        <router-link 
+          v-if="authStore.isAuthenticated" 
+          to="/adoption/dashboard" 
+          class="nav-item" 
+          @click="closeMobileMenu"
+        >
+          Adopsi Saya
+        </router-link>
         <router-link 
           v-if="authStore.isAdmin" 
           to="/admin" 
@@ -82,7 +90,6 @@ const router = useRouter();
 const authStore = useAuthStore();
 const langStore = useLangStore();
 
-const adoptionUrl = ref(import.meta.env.VITE_ADOPTION_URL || 'https://pawpaw-adopt.netlify.app');
 
 const isMobileMenuOpen = ref(false);
 

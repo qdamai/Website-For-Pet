@@ -28,22 +28,40 @@
         <p>Suspend / Hapus User</p>
       </div>
 
-      <!-- Card 3: Export Rekapitulasi -->
-      <div @click="exportData" class="admin-card">
+      <!-- Card 3: Verifikasi Shelter -->
+      <div @click="activeTab = 'shelters'" class="admin-card" :class="{ 'active-card': activeTab === 'shelters' }">
+        <div class="icon-box bg-green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </div>
+        <h3>Verifikasi Shelter</h3>
+        <p>Kelola status shelter</p>
+      </div>
+
+      <!-- Card 4: Moderasi Hewan -->
+      <div @click="activeTab = 'pets'" class="admin-card" :class="{ 'active-card': activeTab === 'pets' }">
         <div class="icon-box bg-purple">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <h3>Moderasi Hewan</h3>
+        <p>Approve / Reject postingan</p>
+      </div>
+
+      <!-- Card 5: System Tools -->
+      <div @click="activeTab = 'seeder'" class="admin-card" :class="{ 'active-card': activeTab === 'seeder' }">
+        <div class="icon-box bg-yellow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        </div>
+        <h3>System Tools</h3>
+        <p>Database Seeder</p>
+      </div>
+
+      <!-- Card 6: Export Rekapitulasi -->
+      <div @click="exportData" class="admin-card">
+        <div class="icon-box bg-red">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         </div>
         <h3>{{ langStore.t('exportSummary') }}</h3>
         <p>Download data PDF</p>
-      </div>
-
-      <!-- Card 4: Reset Database -->
-      <div @click="triggerForceSeed" class="admin-card card-yellow">
-        <div class="icon-box bg-red">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-        </div>
-        <h3>{{ langStore.t('resetDb') }}</h3>
-        <p>Timpa dengan Data Seeder</p>
       </div>
 
     </div>
@@ -104,7 +122,7 @@
               <td class="font-bold">{{ user.uid.substring(0,8) }}</td>
               <td class="text-gray">{{ user.fullname }}</td>
               <td>{{ user.email }}</td>
-              <td><span class="badge" :class="user.role === 'admin' ? 'bg-orange' : 'bg-blue'">{{ user.role }}</span></td>
+              <td><span class="badge" :class="user.role === 'admin' ? 'bg-orange' : user.role === 'shelter' ? 'bg-green' : 'bg-blue'">{{ user.role }}</span></td>
               <td class="action-cell">
                 <button class="btn-delete" @click="deleteUser(user.uid)">{{ langStore.t('delete') }}</button>
               </td>
@@ -114,7 +132,130 @@
       </div>
     </div>
 
+    <!-- Kontainer Verifikasi Shelter -->
+    <div v-if="activeTab === 'shelters'" class="table-container">
+      <h3 class="section-title">Kelola Verifikasi Shelter</h3>
+      <div v-if="loadingShelters" class="text-center font-bold">Memproses data shelter...</div>
+      <div v-else-if="shelterList.length === 0" class="empty-module">
+        Tidak ada shelter terdaftar saat ini.
+      </div>
+      <div v-else class="table-scroll">
+        <table class="neo-table">
+          <thead>
+            <tr>
+              <th>ID Shelter</th>
+              <th>Nama Shelter</th>
+              <th>Kota</th>
+              <th>Status</th>
+              <th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="shelter in shelterList" :key="shelter.id">
+              <td class="font-bold">#{{ shelter.id.substring(0,8).toUpperCase() }}</td>
+              <td class="text-gray">{{ shelter.name }}</td>
+              <td>{{ shelter.city }}</td>
+              <td>
+                <span class="badge" :class="shelter.status === 'Verified' ? 'bg-success' : shelter.status === 'Rejected' ? 'bg-red' : 'bg-orange'">
+                  {{ shelter.status }}
+                </span>
+              </td>
+              <td class="action-cell">
+                <button class="btn-approve" @click="verifyShelter(shelter.id, 'Verified')">Verify</button>
+                <button class="btn-delete" @click="verifyShelter(shelter.id, 'Rejected')">Reject</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
+    <!-- Kontainer Moderasi Hewan Adopsi -->
+    <div v-if="activeTab === 'pets'" class="table-container">
+      <h3 class="section-title">Moderasi Hewan Adopsi</h3>
+      <div v-if="loadingPets" class="text-center font-bold">Memuat data hewan...</div>
+      <div v-else-if="petList.length === 0" class="empty-module">
+        Tidak ada hewan terdaftar di katalog adopsi.
+      </div>
+      <div v-else class="table-scroll">
+        <table class="neo-table">
+          <thead>
+            <tr>
+              <th>Foto</th>
+              <th>Nama</th>
+              <th>Spesies/Ras</th>
+              <th>Status</th>
+              <th>Moderasi</th>
+              <th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="pet in petList" :key="pet.id">
+              <td>
+                <img :src="pet.photo || getPetFallbackImage(pet.species || pet.type)" alt="Photo" class="w-12 h-12 object-cover rounded border-2 border-black" />
+              </td>
+              <td class="font-bold">{{ pet.name }}</td>
+              <td class="text-gray">{{ pet.species }} / {{ pet.breed }}</td>
+              <td><span class="badge">{{ pet.status }}</span></td>
+              <td>
+                <span class="badge" :class="pet.approvedByAdmin ? 'bg-success' : 'bg-orange'">
+                  {{ pet.approvedByAdmin ? 'Approved' : 'Pending Review' }}
+                </span>
+              </td>
+              <td class="action-cell">
+                <button class="btn-approve" @click="moderatePet(pet.id, 'approve')" v-if="!pet.approvedByAdmin">Approve</button>
+                <button class="btn-delete" @click="moderatePet(pet.id, 'reject')" v-if="pet.approvedByAdmin">Reject</button>
+                <button class="btn-delete" @click="moderatePet(pet.id, 'deactivate')" v-if="pet.status !== 'Deactivated'">Deactivate</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Kontainer System Tools: Database Seeder -->
+    <div v-if="activeTab === 'seeder'" class="table-container">
+      <h3 class="section-title">System Tools: Database Seeder</h3>
+      <p class="text-gray mb-6">Menu khusus administrator untuk melakukan populating data dummy dalam database secara instan untuk kebutuhan simulasi aplikasi.</p>
+      
+      <div class="seeder-grid">
+        <div class="seeder-card">
+          <h4>Seed Users</h4>
+          <p>Tanam 50 Adopter, 10 Shelter, dan 3 Admin Demo.</p>
+          <button class="btn-seeder" @click="runSeed('users')">Seed Users</button>
+        </div>
+
+        <div class="seeder-card">
+          <h4>Seed Adoption Pets</h4>
+          <p>Tanam 100 hewan adopsi (50 kucing, 30 anjing, 10 kelinci, 5 burung, 5 hamster).</p>
+          <button class="btn-seeder" @click="runSeed('pets')">Seed Pets</button>
+        </div>
+
+        <div class="seeder-card">
+          <h4>Seed Adoption Requests</h4>
+          <p>Tanam 200 pengajuan adopsi acak dengan status bervariasi.</p>
+          <button class="btn-seeder" @click="runSeed('requests')">Seed Requests</button>
+        </div>
+
+        <div class="seeder-card">
+          <h4>Seed Success Stories</h4>
+          <p>Tanam 20 kisah adopsi sukses terverifikasi.</p>
+          <button class="btn-seeder" @click="runSeed('stories')">Seed Stories</button>
+        </div>
+
+        <div class="seeder-card">
+          <h4>Seed Notifications</h4>
+          <p>Tanam 100 notifikasi pemberitahuan sistem.</p>
+          <button class="btn-seeder" @click="runSeed('notifications')">Seed Notifications</button>
+        </div>
+
+        <div class="seeder-card card-full">
+          <h4>Seed All System Data</h4>
+          <p>Tanam seluruh data di atas secara berurutan dalam satu kali klik.</p>
+          <button class="btn-seeder btn-seeder-all" @click="runSeed('all')">Seed All Data</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -122,9 +263,18 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { getPetFallbackImage } from '../utils/helpers';
 import { useLangStore } from '../stores/lang';
-import { forceSeedDatabase } from '../utils/seeder';
-import { collection, query, where, getDocs, updateDoc, doc, deleteDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { 
+  forceSeedDatabase, 
+  seedUsers, 
+  seedAdoptionPets, 
+  seedAdoptionRequests, 
+  seedSuccessStories, 
+  seedNotifications, 
+  seedAllData 
+} from '../utils/seeder';
+import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import jsPDF from 'jspdf';
 
@@ -133,8 +283,12 @@ const langStore = useLangStore();
 const activeTab = ref('reports');
 const pendingReports = ref([]);
 const userList = ref([]);
+const shelterList = ref([]);
+const petList = ref([]);
 const loading = ref(false);
 const loadingUsers = ref(false);
+const loadingShelters = ref(false);
+const loadingPets = ref(false);
 
 onMounted(() => {
   fetchPendingReports();
@@ -143,6 +297,12 @@ onMounted(() => {
 watch(activeTab, (newTab) => {
   if (newTab === 'users' && userList.value.length === 0) {
     fetchUsers();
+  }
+  if (newTab === 'shelters') {
+    fetchShelters();
+  }
+  if (newTab === 'pets') {
+    fetchPets();
   }
 });
 
@@ -204,6 +364,103 @@ const deleteUser = async (uid) => {
   }
 };
 
+// Shelter operations
+const fetchShelters = async () => {
+  loadingShelters.value = true;
+  try {
+    const snap = await getDocs(collection(db, 'shelters'));
+    shelterList.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loadingShelters.value = false;
+  }
+};
+
+const verifyShelter = async (id, newStatus) => {
+  if (confirm(`Ubah status verifikasi shelter menjadi ${newStatus}?`)) {
+    try {
+      await updateDoc(doc(db, 'shelters', id), { status: newStatus });
+      const shelter = shelterList.value.find(s => s.id === id);
+      if (shelter) {
+        shelter.status = newStatus;
+        if (shelter.userId && newStatus === 'Verified') {
+          await updateDoc(doc(db, 'users', shelter.userId), { role: 'shelter' });
+        }
+      }
+      alert(`Shelter berhasil di-update menjadi ${newStatus}!`);
+    } catch (err) {
+      alert("Gagal memperbarui shelter: " + err.message);
+    }
+  }
+};
+
+// Pet moderation operations
+const fetchPets = async () => {
+  loadingPets.value = true;
+  try {
+    const snap = await getDocs(collection(db, 'adoption_pets'));
+    petList.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loadingPets.value = false;
+  }
+};
+
+const moderatePet = async (id, action) => {
+  if (confirm(`Lakukan moderasi [${action}] pada anabul ini?`)) {
+    try {
+      if (action === 'approve') {
+        await updateDoc(doc(db, 'adoption_pets', id), { approvedByAdmin: true });
+        const pet = petList.value.find(p => p.id === id);
+        if (pet) pet.approvedByAdmin = true;
+      } else if (action === 'reject') {
+        await updateDoc(doc(db, 'adoption_pets', id), { approvedByAdmin: false });
+        const pet = petList.value.find(p => p.id === id);
+        if (pet) pet.approvedByAdmin = false;
+      } else if (action === 'deactivate') {
+        await updateDoc(doc(db, 'adoption_pets', id), { status: 'Deactivated' });
+        const pet = petList.value.find(p => p.id === id);
+        if (pet) pet.status = 'Deactivated';
+      }
+      alert("Moderasi berhasil disimpan!");
+    } catch (err) {
+      alert("Gagal melakukan moderasi: " + err.message);
+    }
+  }
+};
+
+// Seeder logic
+const runSeed = async (type) => {
+  let confirmed = false;
+  if (type === 'all') {
+    confirmed = confirm("Anda yakin ingin menanam seluruh data dummy? Proses ini membutuhkan waktu beberapa detik.");
+  } else {
+    confirmed = confirm(`Jalankan seeder untuk kategori [${type}]?`);
+  }
+
+  if (confirmed) {
+    try {
+      let res;
+      if (type === 'users') res = await seedUsers();
+      else if (type === 'pets') res = await seedAdoptionPets();
+      else if (type === 'requests') res = await seedAdoptionRequests();
+      else if (type === 'stories') res = await seedSuccessStories();
+      else if (type === 'notifications') res = await seedNotifications();
+      else if (type === 'all') res = await seedAllData();
+
+      if (res.success) {
+        alert("Berhasil menanam data dummy");
+      } else {
+        alert(res.message); // Displays "Data sudah tersedia"
+      }
+    } catch (err) {
+      alert("Gagal menanam data: " + err.message);
+    }
+  }
+};
+
 const exportData = async () => {
   try {
     const lostSnap = await getDocs(collection(db, 'lost_pets'));
@@ -211,8 +468,7 @@ const exportData = async () => {
     
     const docPdf = new jsPDF();
     
-    // PDF Styling & Margins
-    docPdf.setFillColor(18, 18, 18); // Dark background matching website theme
+    docPdf.setFillColor(18, 18, 18);
     docPdf.rect(0, 0, 210, 297, 'F');
     
     docPdf.setTextColor(255, 255, 255);
@@ -225,7 +481,6 @@ const exportData = async () => {
     docPdf.setFontSize(10);
     docPdf.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 15, 27);
     
-    // Stats Summary Box
     docPdf.setDrawColor(0, 0, 0);
     docPdf.setFillColor(38, 38, 38);
     docPdf.rect(15, 32, 180, 25, 'F');
@@ -237,17 +492,15 @@ const exportData = async () => {
     docPdf.setFont("helvetica", "normal");
     docPdf.text(`- Total Hewan Hilang (Lost Pets): ${lostSnap.size}`, 20, 46);
     docPdf.text(`- Total Hewan Ditemukan (Found Pets): ${foundSnap.size}`, 20, 52);
-
+    
     let yOffset = 70;
     
-    // Lost Pets Header
     docPdf.setFont("helvetica", "bold");
     docPdf.setFontSize(12);
     docPdf.text("Daftar Hewan Hilang (Lost Pets)", 15, yOffset);
     yOffset += 7;
     
-    // Table Header
-    docPdf.setFillColor(179, 157, 219); // Purple
+    docPdf.setFillColor(179, 157, 219);
     docPdf.rect(15, yOffset, 180, 8, 'F');
     docPdf.rect(15, yOffset, 180, 8, 'D');
     docPdf.setTextColor(26, 26, 26);
@@ -287,15 +540,13 @@ const exportData = async () => {
       yOffset = 20; 
     }
 
-    // Found Pets Header
     docPdf.setTextColor(255, 255, 255);
     docPdf.setFont("helvetica", "bold");
     docPdf.setFontSize(12);
     docPdf.text("Daftar Hewan Ditemukan (Found Pets)", 15, yOffset);
     yOffset += 7;
 
-    // Table Header
-    docPdf.setFillColor(74, 222, 128); // Green
+    docPdf.setFillColor(74, 222, 128);
     docPdf.rect(15, yOffset, 180, 8, 'F');
     docPdf.rect(15, yOffset, 180, 8, 'D');
     docPdf.setTextColor(26, 26, 26);
@@ -332,19 +583,6 @@ const exportData = async () => {
     alert("Gagal export data: " + err.message);
   }
 };
-
-const triggerForceSeed = async () => {
-  if (confirm('Apakah Anda yakin ingin mengganti/mereset isi database dengan data seeder?')) {
-    try {
-      await forceSeedDatabase();
-      alert('Berhasil! Database telah di-seed dengan data awal.');
-    } catch (err) {
-      alert('Gagal menanam data: ' + err.message);
-    }
-  }
-};
-
-
 </script>
 
 <style scoped>
@@ -414,8 +652,6 @@ const triggerForceSeed = async () => {
   border-color: #FF8A65;
 }
 
-.card-yellow { background-color: #FFF176; color: #1A1A1A; }
-
 .icon-box {
   width: 48px;
   height: 48px;
@@ -432,6 +668,8 @@ const triggerForceSeed = async () => {
 .bg-blue { background-color: #64B5F6; }
 .bg-purple { background-color: #B39DDB; }
 .bg-red { background-color: #FF5252; }
+.bg-green { background-color: #4ADE80; }
+.bg-yellow { background-color: #FFF176; }
 
 .admin-card h3 {
   font-weight: 800;
@@ -443,10 +681,6 @@ const triggerForceSeed = async () => {
   font-size: 0.875rem;
   font-weight: 700;
   color: #aaaaaa;
-}
-
-.card-yellow p {
-  color: #333333;
 }
 
 .table-container {
@@ -496,6 +730,7 @@ const triggerForceSeed = async () => {
   border-right: 3px solid #000000;
   background-color: #1A1A1A;
   color: #FFFFFF;
+  vertical-align: middle;
 }
 
 .neo-table td:last-child { border-right: none; }
@@ -515,13 +750,16 @@ const triggerForceSeed = async () => {
   color: #1A1A1A;
 }
 
+.bg-success { background-color: #4ADE80; }
+.bg-red { background-color: #FF6B6B; color: white; }
+
 .action-cell {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
 }
 
-.btn-approve, .btn-delete {
+.btn-approve, .btn-delete, .btn-seeder {
   padding: 0.5rem 0.75rem;
   border: 2px solid #000000;
   border-radius: 8px;
@@ -535,7 +773,7 @@ const triggerForceSeed = async () => {
 .btn-approve { background-color: #4ADE80; color: #1A1A1A; }
 .btn-delete { background-color: #FF6B6B; color: white; }
 
-.btn-approve:active, .btn-delete:active {
+.btn-approve:active, .btn-delete:active, .btn-seeder:active {
   transform: translate(2px, 2px);
   box-shadow: none;
 }
@@ -550,9 +788,65 @@ const triggerForceSeed = async () => {
   color: #aaaaaa;
 }
 
+/* Seeder Styles */
+.seeder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.seeder-card {
+  background-color: #1a1a1a;
+  border: 3px solid #000000;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 4px 0px #000000;
+  color: #ffffff;
+}
+
+.seeder-card h4 {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #FFF176;
+}
+
+.seeder-card p {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #aaaaaa;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+.btn-seeder {
+  background-color: #B39DDB;
+  color: #1A1A1A;
+  width: 100%;
+  text-align: center;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.card-full {
+  grid-column: 1 / -1;
+  background-color: #2e1a47;
+  border-color: #B39DDB;
+}
+
+.btn-seeder-all {
+  background-color: #4ADE80;
+  font-size: 1rem;
+  padding: 1rem;
+}
+
 @media (max-width: 768px) {
   .admin-wrapper { padding: 1rem; }
   .title { font-size: 2rem; }
   .table-container { padding: 1rem; }
+  .seeder-grid { grid-template-columns: 1fr; }
 }
 </style>

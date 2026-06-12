@@ -15,6 +15,7 @@
           <option value="Kucing">Kucing</option>
           <option value="Anjing">Anjing</option>
           <option value="Burung">Burung</option>
+          <option value="Kelinci">Kelinci</option>
         </select>
         <select v-model="tab" class="neo-input select-input">
           <option value="lost">Hewan Hilang</option>
@@ -24,8 +25,8 @@
     </div>
 
     <!-- Content -->
-    <div v-if="petStore.loading" class="grid-catalog">
-      <SkeletonLoader v-for="i in 4" :key="i" height="350px" />
+    <div v-if="isLoading" class="grid-catalog">
+      <SkeletonLoader v-for="i in 6" :key="i" height="350px" />
     </div>
     
     <div v-else-if="filteredPets.length === 0">
@@ -40,7 +41,12 @@
         @click="goToDetail(pet)"
       >
         <div class="img-wrapper">
-          <img :src="pet.photo" alt="Foto Hewan" class="pet-img">
+          <img 
+            :src="getPhotoSrc(pet)" 
+            alt="Foto Hewan" 
+            class="pet-img"
+            @error="onImgError($event, pet)"
+          >
         </div>
         <div class="pet-details">
           <div class="pet-header">
@@ -64,6 +70,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePetStore } from '../stores/petStore';
 import { useLangStore } from '../stores/lang';
+import { getPetFallbackImage } from '../utils/helpers';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
 import EmptyState from '../components/EmptyState.vue';
 
@@ -74,10 +81,34 @@ const langStore = useLangStore();
 const tab = ref('lost');
 const searchQuery = ref('');
 const filterType = ref('all');
+const isLoading = ref(true);
+
+// Returns the best available photo src for a pet
+const getPhotoSrc = (pet) => {
+  // If photo is a valid http/https URL or a data URL, use it; else use fallback
+  const p = pet.photo;
+  if (p && (p.startsWith('http') || p.startsWith('data:'))) {
+    return p;
+  }
+  return getPetFallbackImage(pet.type);
+};
+
+// When img fails to load, swap to fallback immediately
+const onImgError = (event, pet) => {
+  event.target.src = getPetFallbackImage(pet.type);
+  event.target.onerror = null; // prevent infinite loop
+};
 
 onMounted(async () => {
-  await petStore.fetchLostPets();
-  await petStore.fetchFoundPets();
+  isLoading.value = true;
+  try {
+    await Promise.all([
+      petStore.fetchLostPets(),
+      petStore.fetchFoundPets()
+    ]);
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 const filteredPets = computed(() => {
@@ -100,7 +131,7 @@ const filteredPets = computed(() => {
 });
 
 const goToDetail = (pet) => {
-  const id = tab.value === 'lost' ? pet.petId : pet.reportId;
+  const id = tab.value === 'lost' ? (pet.petId || pet.id) : (pet.reportId || pet.id);
   router.push({ name: 'PetDetail', params: { type: tab.value, id } });
 };
 </script>

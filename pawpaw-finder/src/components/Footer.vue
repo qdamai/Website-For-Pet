@@ -1,6 +1,4 @@
 <script setup>
-import { ref } from 'vue';
-const adoptionUrl = ref(import.meta.env.VITE_ADOPTION_URL || 'https://pawpaw-adopt.netlify.app');
 </script>
 
 <template>
@@ -20,7 +18,7 @@ const adoptionUrl = ref(import.meta.env.VITE_ADOPTION_URL || 'https://pawpaw-ado
             <router-link to="/report" class="footer-link">Laporkan</router-link>
             <router-link to="/chat" class="footer-link">Obrolan</router-link>
             <router-link to="/profile" class="footer-link">Profil</router-link>
-            <a :href="adoptionUrl" target="_blank" rel="noopener noreferrer" class="footer-link">Portal Adopsi</a>
+            <router-link to="/adoption" class="footer-link">Portal Adopsi</router-link>
           </div>
         </div>
       </div>

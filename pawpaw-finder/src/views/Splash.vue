@@ -60,9 +60,9 @@
       </button>
 
       <!-- Adoption CTA Button -->
-      <a :href="adoptionUrl" target="_blank" rel="noopener noreferrer" class="adoption-cta-button">
-        Adopsi Hewan
-      </a>
+      <router-link to="/adoption" class="adoption-cta-button">
+        Adopsi Hewan 🐾
+      </router-link>
 
     </div>
   </div>
@@ -72,8 +72,6 @@
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-
-const adoptionUrl = import.meta.env.VITE_ADOPTION_URL || 'https://pawpaw-adopt.netlify.app';
 
 const goToAuth = () => {
   router.push({ name: 'Auth' });

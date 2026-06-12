@@ -16,7 +16,7 @@
       <!-- Left Column (Photo & QR) -->
       <div class="flex flex-col gap-6">
         <NeoCard class="p-0 overflow-hidden">
-          <img :src="pet.photo" alt="Foto" class="w-full h-auto max-h-96 object-cover border-b-3 border-black" />
+          <img :src="pet.photo || getPetFallbackImage(pet.type)" alt="Foto" class="w-full h-auto max-h-96 object-cover border-b-3 border-black" />
           <div class="p-4 text-center">
             <h2 class="text-2xl font-bold">{{ pet.name || 'Hewan Ditemukan' }}</h2>
             <span class="badge" :class="pet.status === 'Missing' ? 'bg-primary' : 'bg-success'">{{ pet.status }}</span>
@@ -66,6 +66,15 @@
               {{ matchLoading ? 'Menganalisis...' : langStore.t('aiMatch') }}
             </NeoButton>
             <NeoButton v-if="pet.status === 'Missing'" variant="primary" class="w-full btn-action" @click="generatePDF">{{ langStore.t('downloadWanted') }}</NeoButton>
+            <NeoButton 
+              v-if="authStore.isAdmin && type === 'found' && pet.status !== 'Transferred'" 
+              variant="primary" 
+              class="w-full btn-action" 
+              style="background-color: #FFF176; color: #1A1A1A; border-color: #000000; margin-top: 0.5rem;"
+              @click="transferToAdoption"
+            >
+              Pindahkan ke Adopsi 🔄
+            </NeoButton>
           </div>
         </NeoCard>
 
@@ -111,6 +120,7 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { getPetFallbackImage } from '../utils/helpers';
 import { usePetStore } from '../stores/petStore';
 import { useAuthStore } from '../stores/auth';
 import { useLangStore } from '../stores/lang';
@@ -119,7 +129,7 @@ import NeoButton from '../components/NeoButton.vue';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
 import EmptyState from '../components/EmptyState.vue';
 import QrcodeVue from 'qrcode.vue';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import 'leaflet/dist/leaflet.css';
 import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet';
@@ -221,8 +231,9 @@ const generatePDF = async () => {
 
   // Pet Image drawing with base64 DataURL
   let imgBase64 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-  if (pet.value.photo) {
-    imgBase64 = await getBase64ImageFromUrl(pet.value.photo);
+  const targetPhoto = pet.value.photo || getPetFallbackImage(pet.value.type);
+  if (targetPhoto) {
+    imgBase64 = await getBase64ImageFromUrl(targetPhoto);
   }
 
   // Draw photo in center top
@@ -322,6 +333,63 @@ const startChat = async () => {
   }
   
   router.push({ name: 'LiveChat', query: { room: chatId } });
+};
+
+const transferToAdoption = async () => {
+  if (!pet.value) return;
+  if (confirm(`Apakah Anda yakin ingin memindahkan ${pet.value.type} ini ke katalog adopsi?`)) {
+    try {
+      const adpId = `ADP_sync_${id}`;
+      const photos = [
+        pet.value.photo,
+        pet.value.photo,
+        pet.value.photo,
+        pet.value.photo,
+        pet.value.photo
+      ];
+
+      const petDoc = {
+        id: adpId,
+        name: pet.value.name || `Rescue ${pet.value.type}`,
+        species: pet.value.type === 'Kucing' || pet.value.type === 'Cat' ? 'Cat' : pet.value.type === 'Anjing' || pet.value.type === 'Dog' ? 'Dog' : 'Others',
+        breed: pet.value.breed || 'Campuran',
+        gender: pet.value.gender || 'Jantan',
+        age: 1,
+        weight: 3.5,
+        vaccinated: false,
+        sterilized: false,
+        healthStatus: 'Healthy',
+        location: pet.value.foundLocation || 'Padang',
+        status: 'Available',
+        personality: ["Friendly", "Rescue"],
+        traits: {
+          active: true,
+          childFriendly: true,
+          petFriendly: true,
+          apartmentFriendly: true,
+          energyLevel: 2
+        },
+        ownerId: 'admin_support_pawpaw',
+        photos,
+        photo: pet.value.photo,
+        description: pet.value.description || `Ditransfer dari temuan Pet Finder.`,
+        lastCheckupDate: new Date().toISOString().split('T')[0],
+        allergies: 'Tidak ada',
+        medicalHistory: 'Catatan Kesehatan: Baik. Ditransfer ke adopsi.',
+        createdAt: serverTimestamp()
+      };
+
+      await setDoc(doc(db, 'adoption_pets', adpId), petDoc);
+      await updateDoc(doc(db, 'found_pets', id), {
+        status: 'Transferred'
+      });
+
+      pet.value.status = 'Transferred';
+      alert("Berhasil memindahkan hewan ke katalog adopsi!");
+    } catch (err) {
+      alert("Gagal memindahkan: " + err.message);
+    }
+  }
 };
 </script>
 

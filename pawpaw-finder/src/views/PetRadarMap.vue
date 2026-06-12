@@ -37,7 +37,7 @@
         >
           <l-popup>
             <div class="popup-card">
-              <img :src="pet.photo" alt="Foto" class="popup-img">
+              <img :src="pet.photo || getPetFallbackImage(pet.type)" alt="Foto" class="popup-img">
               <h3 class="popup-title">{{ pet.name || 'Hewan Hilang' }}</h3>
               <p class="popup-meta">{{ pet.lastLocation }}</p>
               <span class="badge bg-red">Hilang</span>
@@ -55,7 +55,7 @@
         >
           <l-popup>
             <div class="popup-card">
-              <img :src="pet.photo" alt="Foto" class="popup-img">
+              <img :src="pet.photo || getPetFallbackImage(pet.type)" alt="Foto" class="popup-img">
               <h3 class="popup-title">Hewan Ditemukan</h3>
               <p class="popup-meta">{{ pet.foundLocation }}</p>
               <span class="badge bg-green">Ditemukan</span>
@@ -80,6 +80,7 @@ import { useRouter } from 'vue-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useLangStore } from '../stores/lang';
+import { getPetFallbackImage } from '../utils/helpers';
 
 import 'leaflet/dist/leaflet.css';
 import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet';

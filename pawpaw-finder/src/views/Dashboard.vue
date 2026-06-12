@@ -84,9 +84,9 @@
     <div class="adoption-banner bg-blue">
       <h3 class="banner-title">Ingin Memelihara Hewan?</h3>
       <p class="banner-subtitle">{{ langStore.t('adoptSub') }}</p>
-      <a :href="adoptionUrl" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+      <router-link to="/adoption" style="text-decoration: none;">
         <button class="btn-adopt">{{ langStore.t('adoptBtn') }}</button>
-      </a>
+      </router-link>
     </div>
 
   </div>
@@ -103,7 +103,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const langStore = useLangStore();
 
-const adoptionUrl = import.meta.env.VITE_ADOPTION_URL || 'https://pawpaw-adopt.netlify.app';
+
 
 const handleLogout = async () => {
   await authStore.logout();
