@@ -4,7 +4,7 @@ import Footer from './components/Footer.vue';
 </script>
 
 <template>
-  <div class="app-layout">
+  <div class="app-container">
     <Navbar />
     <div class="main-content">
       <router-view />
@@ -14,10 +14,11 @@ import Footer from './components/Footer.vue';
 </template>
 
 <style>
-.app-layout {
+.app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden;
   background-color: var(--color-bg);
 }
 

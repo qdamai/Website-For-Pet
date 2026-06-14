@@ -44,16 +44,16 @@
           <h3 class="card-title">Karakter &amp; Gaya Hidup</h3>
           <div class="traits-grid">
             <div class="trait-badge" :class="{ 'trait-yes': pet.traits?.active }">
-              ⚡ Aktif &amp; Energik: {{ pet.traits?.active ? 'Ya' : 'Tidak' }}
+              <Zap class="inline" /> Aktif &amp; Energik: {{ pet.traits?.active ? 'Ya' : 'Tidak' }}
             </div>
             <div class="trait-badge" :class="{ 'trait-yes': pet.traits?.childFriendly }">
-              👶 Ramah Anak: {{ pet.traits?.childFriendly ? 'Ya' : 'Tidak' }}
+              <Baby class="inline" /> Ramah Anak: {{ pet.traits?.childFriendly ? 'Ya' : 'Tidak' }}
             </div>
             <div class="trait-badge" :class="{ 'trait-yes': pet.traits?.petFriendly }">
-              🐶 Ramah Hewan Lain: {{ pet.traits?.petFriendly ? 'Ya' : 'Tidak' }}
+              <Dog class="inline" /> Ramah Hewan Lain: {{ pet.traits?.petFriendly ? 'Ya' : 'Tidak' }}
             </div>
             <div class="trait-badge" :class="{ 'trait-yes': pet.traits?.apartmentFriendly }">
-              🏢 Cocok di Apartemen: {{ pet.traits?.apartmentFriendly ? 'Ya' : 'Tidak' }}
+              <Building class="inline" /> Cocok di Apartemen: {{ pet.traits?.apartmentFriendly ? 'Ya' : 'Tidak' }}
             </div>
           </div>
         </div>
@@ -69,7 +69,7 @@
                 {{ pet.status === 'Available' ? 'Tersedia' : pet.status === 'Reserved' ? 'Dipesan' : 'Diadopsi' }}
               </span>
               <h1 class="pet-name">{{ pet.name }}</h1>
-              <p class="pet-location">📍 {{ pet.location }}</p>
+              <p class="pet-location"><MapPin :size="18" class="inline" /> {{ pet.location }}</p>
             </div>
             <span class="id-tag">ID: #{{ pet.id.substring(0,8).toUpperCase() }}</span>
           </div>
@@ -99,7 +99,7 @@
 
         <!-- Digital Health Passport -->
         <div class="health-passport-card">
-          <h3 class="card-title">🛡️ Pet Health Passport</h3>
+          <h3 class="card-title"><Shield class="inline" /> Pet Health Passport</h3>
           <div class="health-list">
             <div class="health-row">
               <span class="health-lbl">Status Vaksin</span>
@@ -146,10 +146,10 @@
           
           <div class="secondary-actions">
             <button @click="showVisitModal = true" class="btn-neo btn-secondary">
-              📅 Kunjungan
+              <Calendar :size="18" class="inline" /> Kunjungan
             </button>
             <button @click="startChat" class="btn-neo btn-secondary">
-              💬 Chat Shelter
+              <MessageSquare :size="18" class="inline" /> Chat Shelter
             </button>
           </div>
         </div>
@@ -190,6 +190,7 @@
 </template>
 
 <script setup>
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon, Building, Zap, Shield, Baby } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -223,7 +224,7 @@ onMounted(async () => {
 const fetchPetDetail = async () => {
   loading.value = true;
   try {
-    const docRef = doc(db, 'adoption_pets', id);
+    const docRef = doc(db, 'adopt_pets', id);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
       pet.value = snap.data();
@@ -244,7 +245,7 @@ const goToAdoptForm = () => {
     router.push({ name: 'Auth' });
     return;
   }
-  router.push(`/adoption/apply/${id}`);
+  router.push(`/apply/${route.params.id}`);
 };
 
 const submitAppointment = async () => {
@@ -271,7 +272,7 @@ const submitAppointment = async () => {
       createdAt: serverTimestamp()
     };
 
-    await setDoc(doc(db, 'appointments', aptId), appointmentDoc);
+    await setDoc(doc(db, 'adopt/data/appointments', aptId), appointmentDoc);
     alert("Janji temu kunjungan berhasil dijadwalkan! Menunggu konfirmasi shelter di dashboard.");
     showVisitModal.value = false;
     visitForm.value = { date: '', time: '', notes: '' };
@@ -297,7 +298,7 @@ const startChat = async () => {
   const convId = `adopt_conv_${[authStore.user.uid, pet.value.shelterId].sort().join('_')}`;
   
   try {
-    const convRef = doc(db, 'conversations', convId);
+    const convRef = doc(db, 'adopt_chats', convId);
     const snap = await getDoc(convRef);
     if (!snap.exists()) {
       await setDoc(convRef, {
@@ -312,7 +313,7 @@ const startChat = async () => {
       });
     }
 
-    router.push({ path: '/adoption/dashboard', query: { tab: 'chat', room: convId } });
+    router.push({ path: '/dashboard', query: { tab: 'chat', room: convId } });
   } catch (err) {
     alert("Gagal memulai chat: " + err.message);
   }
@@ -360,10 +361,10 @@ const startChat = async () => {
 }
 
 .main-image-card {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   background-color: #1a1a1a;
   aspect-ratio: 4/3;
   position: relative;
@@ -381,8 +382,8 @@ const startChat = async () => {
   left: 1rem;
   background-color: #B39DDB;
   color: #1A1A1A;
-  border: 2px solid #000000;
-  border-radius: 8px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 0.35rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 800;
@@ -395,12 +396,12 @@ const startChat = async () => {
 }
 
 .thumb-item {
-  border: 3px solid #000000;
-  border-radius: 12px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
   aspect-ratio: 1;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: var(--shadow-neo-active);
   transition: all 0.2s;
   background-color: #1a1a1a;
 }
@@ -411,7 +412,7 @@ const startChat = async () => {
 
 .thumb-item.active-thumb {
   border-color: #FF8A65;
-  box-shadow: 3px 3px 0px #000000;
+  box-shadow: var(--shadow-neo-hover);
   transform: scale(0.95);
 }
 
@@ -424,17 +425,17 @@ const startChat = async () => {
 /* Traits & Personality */
 .traits-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 1.5rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .card-title {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin-bottom: 1rem;
 }
 
@@ -445,19 +446,19 @@ const startChat = async () => {
 }
 
 .trait-badge {
-  border: 2px solid #000000;
-  border-radius: 12px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 0.75rem;
   font-size: 0.85rem;
   font-weight: 700;
   background-color: #1A1A1A;
-  color: #888888;
+  color: #FFFFFF;
 }
 
 .trait-badge.trait-yes {
   background-color: #FFF176;
   color: #1A1A1A;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: var(--shadow-neo-active);
 }
 
 /* Info Column */
@@ -469,17 +470,17 @@ const startChat = async () => {
 
 .info-header-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .status-tag {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  border: 2px solid #000000;
-  border-radius: 8px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -494,24 +495,25 @@ const startChat = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin: 0;
 }
 
 .pet-location {
   font-size: 1rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin: 0.25rem 0 0 0;
 }
 
 .id-tag {
   background-color: #1a1a1a;
-  border: 2px solid #000000;
-  border-radius: 8px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.5rem;
   font-size: 0.7rem;
   font-weight: 800;
+  color: #FFFFFF;
 }
 
 .quick-stats-row {
@@ -541,7 +543,7 @@ const startChat = async () => {
 .stat-box .val {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin-top: 0.25rem;
 }
 
@@ -553,8 +555,8 @@ const startChat = async () => {
 
 .tag-item {
   background-color: #1a1a1a;
-  border: 2px solid #000000;
-  border-radius: 8px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 0.35rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 800;
@@ -564,10 +566,10 @@ const startChat = async () => {
 /* Digital Health Passport */
 .health-passport-card {
   background-color: #2e1a47; /* purple variant */
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   border-color: #B39DDB;
 }
 
@@ -604,7 +606,7 @@ const startChat = async () => {
   margin-top: 1rem;
   background-color: rgba(0,0,0,0.3);
   padding: 1rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 2px dashed #B39DDB;
 }
 
@@ -619,17 +621,17 @@ const startChat = async () => {
 /* Description Card */
 .desc-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .desc-text {
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.6;
-  color: #dddddd;
+  color: var(--color-text);
 }
 
 /* Actions Panel */
@@ -650,7 +652,7 @@ const startChat = async () => {
 .btn-adopt-main:disabled {
   background-color: #262626;
   color: #555555;
-  border-color: #000000;
+  border-color: var(--color-border);
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
@@ -664,8 +666,8 @@ const startChat = async () => {
 
 .btn-secondary {
   background-color: #1a1a1a;
-  color: #FFFFFF;
-  border-color: #000000;
+  color: var(--color-text-dark);
+  border-color: var(--color-border);
   padding: 0.75rem;
 }
 
@@ -739,7 +741,7 @@ const startChat = async () => {
 }
 
 .form-group .neo-input {
-  background-color: #FFFFFF;
+  background-color: var(--color-text-dark);
   color: #1A1A1A;
 }
 
@@ -754,10 +756,10 @@ const startChat = async () => {
 
 .loading-wrapper, .empty-wrapper {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 5rem 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .bg-green { background-color: #4ADE80; color: #1a1a1a; }

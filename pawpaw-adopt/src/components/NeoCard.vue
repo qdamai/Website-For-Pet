@@ -38,6 +38,6 @@ const handleClick = (e) => {
 
 .neo-card.is-hoverable:hover {
   box-shadow: var(--shadow-neo-hover);
-  transform: translate(-2px, -2px);
+  transform: translateY(-4px);
 }
 </style>

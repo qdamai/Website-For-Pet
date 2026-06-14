@@ -27,7 +27,7 @@
             <div>
               <h3 class="summary-name">{{ pet.name }}</h3>
               <p class="summary-info">{{ pet.species }} &bull; {{ pet.breed }}</p>
-              <p class="summary-loc">📍 {{ pet.location }}</p>
+              <p class="summary-loc"><MapPin :size="18" class="inline" /> {{ pet.location }}</p>
             </div>
           </div>
           <div class="requirements-box">
@@ -122,7 +122,7 @@
                 <div class="upload-item">
                   <label>Foto KTP</label>
                   <div class="upload-box">
-                    <span class="icon">🪪</span>
+                    <span class="icon"><IdCard class="inline" /></span>
                     <span class="file-name">{{ ktpFileName || 'Belum ada file' }}</span>
                     <input type="file" @change="handleFileChange($event, 'ktp')" class="file-input" required />
                   </div>
@@ -131,7 +131,7 @@
                 <div class="upload-item">
                   <label>Foto Rumah</label>
                   <div class="upload-box">
-                    <span class="icon">🏡</span>
+                    <span class="icon"><Home class="inline" /></span>
                     <span class="file-name">{{ houseFileName || 'Belum ada file' }}</span>
                     <input type="file" @change="handleFileChange($event, 'house')" class="file-input" required />
                   </div>
@@ -140,7 +140,7 @@
                 <div class="upload-item">
                   <label>Foto Area Hewan</label>
                   <div class="upload-box">
-                    <span class="icon">🐾</span>
+                    <span class="icon"><PawPrint :size="18" class="inline" /></span>
                     <span class="file-name">{{ petAreaFileName || 'Belum ada file' }}</span>
                     <input type="file" @change="handleFileChange($event, 'petArea')" class="file-input" required />
                   </div>
@@ -160,6 +160,7 @@
 </template>
 
 <script setup>
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon, IdCard } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -215,7 +216,7 @@ onMounted(async () => {
 const fetchPetDetail = async () => {
   loadingPet.value = true;
   try {
-    const docRef = doc(db, 'adoption_pets', id);
+    const docRef = doc(db, 'adopt_pets', id);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
       pet.value = snap.data();
@@ -241,7 +242,7 @@ const submitApplication = async () => {
   try {
     const reqId = `REQ_${Date.now()}`;
     
-    // Save to firestore collection adoption_requests
+    // Save to firestore collection adopt_requests
     const requestDoc = {
       id: reqId,
       petId: pet.value.id,
@@ -267,11 +268,11 @@ const submitApplication = async () => {
       createdAt: new Date().toISOString()
     };
 
-    await setDoc(doc(db, 'adoption_requests', reqId), requestDoc);
+    await setDoc(doc(db, 'adopt_requests', reqId), requestDoc);
 
     // Save notification for Adopter
     const notifId = `notif_${Date.now()}`;
-    await setDoc(doc(db, 'notifications', notifId), {
+    await setDoc(doc(db, 'adopt_notifications', notifId), {
       id: notifId,
       userId: authStore.user.uid,
       title: 'Pengajuan Terkirim',
@@ -282,7 +283,7 @@ const submitApplication = async () => {
     });
 
     alert("Pengajuan adopsi Anda berhasil dikirim! Silakan pantau status pengajuan Anda di dashboard Adopsi Saya.");
-    router.push('/adoption/dashboard');
+    router.push('/dashboard');
   } catch (err) {
     alert("Gagal mengirim pengajuan adopsi: " + err.message);
   } finally {
@@ -308,6 +309,7 @@ const submitApplication = async () => {
 .btn-back {
   background-color: #B39DDB;
   color: #1A1A1A;
+  border: 2px solid #000000;
 }
 
 .form-layout-grid {
@@ -332,17 +334,17 @@ const submitApplication = async () => {
 
 .summary-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .title-section {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin-bottom: 1.5rem;
 }
 
@@ -350,11 +352,11 @@ const submitApplication = async () => {
   display: flex;
   gap: 1.25rem;
   align-items: center;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   background-color: #1a1a1a;
   padding: 1rem;
-  border-radius: 16px;
-  box-shadow: 3px 3px 0px #000000;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-neo-hover);
   margin-bottom: 2rem;
 }
 
@@ -362,8 +364,8 @@ const submitApplication = async () => {
   width: 80px;
   height: 80px;
   object-fit: cover;
-  border-radius: 12px;
-  border: 2px solid #000000;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--color-border);
 }
 
 .summary-name {
@@ -391,9 +393,9 @@ const submitApplication = async () => {
 .requirements-box {
   background-color: rgba(255, 138, 101, 0.15);
   border: 2px dashed #FF8A65;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
-  color: #FFFDF9;
+  color: var(--color-text-dark);
 }
 
 .requirements-box h4 {
@@ -419,24 +421,24 @@ const submitApplication = async () => {
 /* Form Column */
 .form-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2.5rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .form-title {
   font-family: 'Fredoka', sans-serif;
   font-size: 2rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin: 0;
 }
 
 .form-subtitle {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin: 0.5rem 0 2rem 0;
   line-height: 1.6;
 }
@@ -467,7 +469,7 @@ const submitApplication = async () => {
   font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #aaaaaa;
+  color: var(--color-text);
 }
 
 /* Upload Box elements */
@@ -481,7 +483,7 @@ const submitApplication = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin-bottom: 1.25rem;
 }
 
@@ -500,12 +502,12 @@ const submitApplication = async () => {
 .upload-item label {
   font-size: 0.8rem;
   font-weight: 800;
-  color: #aaaaaa;
+  color: var(--color-text);
 }
 
 .upload-box {
-  border: 3px dashed #000000;
-  border-radius: 12px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
   background-color: #1a1a1a;
   padding: 1.25rem;
   display: flex;
@@ -514,7 +516,7 @@ const submitApplication = async () => {
   text-align: center;
   position: relative;
   cursor: pointer;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: var(--shadow-neo-active);
   transition: all 0.2s;
 }
 
@@ -527,12 +529,13 @@ const submitApplication = async () => {
 .upload-box .icon {
   font-size: 2rem;
   margin-bottom: 0.5rem;
+  color: #FFFFFF;
 }
 
 .upload-box .file-name {
   font-size: 0.75rem;
   font-weight: 800;
-  color: #aaaaaa;
+  color: #FFFFFF;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
@@ -557,9 +560,9 @@ const submitApplication = async () => {
 
 .loading-wrapper, .empty-wrapper {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 5rem 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 </style>

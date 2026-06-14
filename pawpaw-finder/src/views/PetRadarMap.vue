@@ -132,8 +132,8 @@ onMounted(async () => {
 const fetchData = async () => {
   try {
     const [lostSnap, foundSnap] = await Promise.all([
-      getDocs(collection(db, 'lost_pets')),
-      getDocs(collection(db, 'found_pets'))
+      getDocs(collection(db, 'finder_lost_pets')),
+      getDocs(collection(db, 'finder_found_pets'))
     ]);
     
     // Filter pets that have valid coordinates
@@ -215,9 +215,9 @@ const goToDetail = (type, id) => {
 .map-container {
   flex: 1;
   min-height: 500px;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   overflow: hidden;
   position: relative;
   z-index: 0;
@@ -242,9 +242,9 @@ const goToDetail = (type, id) => {
   font-family: 'Fredoka', sans-serif;
   font-weight: 800;
   padding: 0.5rem 1rem;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
@@ -273,7 +273,7 @@ const goToDetail = (type, id) => {
   width: 100px;
   height: 100px;
   object-fit: cover;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 50%;
   margin-bottom: 0.5rem;
 }
@@ -297,7 +297,7 @@ const goToDetail = (type, id) => {
   font-weight: 800;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   margin-bottom: 0.5rem;
 }
 
@@ -307,18 +307,18 @@ const goToDetail = (type, id) => {
   font-size: 0.85rem;
   background-color: #FF8A65;
   color: #1A1A1A;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 /* Fix Leaflet default popup override */
 :deep(.leaflet-popup-content-wrapper) {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 16px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   background-color: #FFFFFF;
 }
 :deep(.leaflet-popup-tip) {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-top: none;
   border-left: none;
   background-color: #FFFFFF;

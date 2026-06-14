@@ -140,7 +140,7 @@ const goToDetail = (pet) => {
 .explore-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 4rem 2rem 2rem;
   font-family: 'Nunito', sans-serif;
   min-height: 100vh;
 }
@@ -149,16 +149,16 @@ const goToDetail = (pet) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3.5rem;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 3rem;
 }
 
 .explore-title {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin: 0;
 }
 
@@ -166,23 +166,24 @@ const goToDetail = (pet) => {
   font-family: 'Fredoka', 'Nunito', sans-serif;
   font-weight: 800;
   padding: 0.75rem 1.5rem;
-  background-color: #FF8A65;
-  color: #1A1A1A;
-  border: 3px solid #000000;
-  border-radius: 12px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  background-color: var(--color-card-bg);
+  color: var(--color-text-dark);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
 }
 
 .btn-neo:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-neo-hover);
+  border-color: var(--color-primary);
 }
 
 .btn-neo:active {
-  transform: translate(2px, 2px);
+  transform: translateY(1px);
   box-shadow: none;
 }
 
@@ -197,10 +198,10 @@ const goToDetail = (pet) => {
 /* Filters */
 .filter-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 1.5rem;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   margin-bottom: 3rem;
 }
 
@@ -208,24 +209,6 @@ const goToDetail = (pet) => {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
-}
-
-.neo-input {
-  padding: 0.75rem 1rem;
-  background-color: #1A1A1A;
-  border: 3px solid #000000;
-  border-radius: 12px;
-  font-weight: 700;
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  color: #FFFFFF;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.neo-input:focus {
-  border-color: #FF8A65;
-  box-shadow: 4px 4px 0px 0px #000000;
 }
 
 .search-input {
@@ -247,12 +230,12 @@ const goToDetail = (pet) => {
 /* Pet Card */
 .pet-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
   height: 100%;
@@ -260,13 +243,13 @@ const goToDetail = (pet) => {
 
 .pet-card:hover {
   transform: translateY(-4px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .img-wrapper {
   height: 250px;
   width: 100%;
-  border-bottom: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
   background-color: #1A1A1A;
   overflow: hidden;
 }
@@ -296,17 +279,17 @@ const goToDetail = (pet) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin: 0;
   word-break: break-word;
 }
 
 .badge {
   padding: 0.35rem 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 0.75rem;
   font-weight: 800;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   white-space: nowrap;
 }
 

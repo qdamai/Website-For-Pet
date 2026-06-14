@@ -10,14 +10,17 @@
       
       <!-- Quick Options Tray -->
       <div class="header-actions">
-        <button @click="router.push('/adoption/quiz')" class="btn-neo btn-quiz">
-          Cari Jodoh Anabul 🎯
+        <button @click="router.push('/quiz')" class="btn-neo btn-quiz">
+          Cari Jodoh Anabul <Target class="inline" />
         </button>
-        <button @click="router.push('/adoption/stories')" class="btn-neo btn-stories">
-          Kisah Sukses 💖
+        <button @click="router.push('/stories')" class="btn-neo btn-stories">
+          Kisah Sukses <Heart class="inline" />
         </button>
-        <button @click="router.push('/adoption/compare')" class="btn-neo btn-compare">
-          Bandingkan ({{ compareIds.length }}/3) 📊
+        <button @click="router.push('/compare')" class="btn-neo btn-compare">
+          Bandingkan ({{ compareIds.length }}/3) <BarChart2 class="inline" />
+        </button>
+        <button v-if="authStore.isAuthenticated" @click="router.push('/upload')" class="btn-neo bg-yellow">
+          Posting Anabul <Upload class="inline" />
         </button>
       </div>
     </div>
@@ -108,41 +111,44 @@
 
         <!-- Details Info -->
         <div class="pet-details">
-          <div class="pet-header">
+          <div class="pet-info-top">
+            <div class="pet-header">
             <h3 class="pet-name">{{ pet.name }}</h3>
             <span class="badge health-badge">{{ pet.healthStatus }}</span>
           </div>
 
           <p class="pet-desc">{{ pet.description }}</p>
 
-          <div class="specs-grid">
-            <div class="spec-item">
-              <span class="icon">📍</span>
+          <div class="pet-stats">
+            <div class="stat-item">
+              <span class="icon"><MapPin class="inline" /></span>
               <span class="text">{{ pet.location }}</span>
             </div>
-            <div class="spec-item">
-              <span class="icon">🧬</span>
+            <div class="stat-item">
+              <span class="icon"><Dna class="inline" /></span>
               <span class="text">{{ pet.gender === 'Male' ? 'Jantan' : 'Betina' }}</span>
             </div>
-            <div class="spec-item">
-              <span class="icon">🎂</span>
+            <div class="stat-item">
+              <span class="icon"><Cake class="inline" /></span>
               <span class="text">{{ pet.age }} Tahun</span>
             </div>
-            <div class="spec-item">
-              <span class="icon">⚖️</span>
+            <div class="stat-item">
+              <span class="icon"><Scale class="inline" />️</span>
               <span class="text">{{ pet.weight }} Kg</span>
             </div>
           </div>
 
+            </div>
+
           <!-- Actions -->
-          <div class="card-actions">
+          <div class="pet-actions mt-auto">
             <button @click.stop="goToDetail(pet.id)" class="btn-neo btn-details">
               Lihat Profil Lengkap
             </button>
             <button 
               v-if="pet.status === 'Available'"
               @click.stop="handleToggleCompare(pet.id)" 
-              class="btn-neo btn-compare-toggle"
+              class="btn-neo btn-compare-action"
               :class="{ 'compared': compareIds.includes(pet.id) }"
             >
               {{ compareIds.includes(pet.id) ? 'Batal Bandingkan' : 'Bandingkan Anabul' }}
@@ -156,6 +162,8 @@
 </template>
 
 <script setup>
+import { Target, Scale, BarChart2, MapPin, Heart, Cake, Dna, Upload } from 'lucide-vue-next';
+
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -193,7 +201,7 @@ const fetchPets = async () => {
   loading.value = true;
   try {
     // Read only approved or default pets (for admin moderation sync we also include approved check)
-    const q = query(collection(db, 'adoption_pets'));
+    const q = query(collection(db, 'adopt_pets'));
     const snap = await getDocs(q);
     pets.value = snap.docs.map(doc => doc.data());
   } catch (err) {
@@ -268,7 +276,7 @@ const handleToggleCompare = (petId) => {
 };
 
 const goToDetail = (id) => {
-  router.push(`/adoption/pet/${id}`);
+  router.push(`/pet/${id}`);
 };
 </script>
 
@@ -276,7 +284,7 @@ const goToDetail = (id) => {
 .adoption-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 4rem 2rem 3rem;
   font-family: 'Nunito', sans-serif;
   min-height: 100vh;
   background-color: var(--color-bg);
@@ -296,14 +304,14 @@ const goToDetail = (id) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.75rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #111111;
   margin: 0;
 }
 
 .catalog-subtitle {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: #2D3748;
   margin: 0.25rem 0 0 0;
   max-width: 600px;
 }
@@ -312,6 +320,7 @@ const goToDetail = (id) => {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  margin-bottom: 2rem;
 }
 
 .btn-neo {
@@ -404,7 +413,6 @@ const goToDetail = (id) => {
   box-shadow: 4px 4px 0px 0px #000000;
   cursor: pointer;
   transition: all 0.2s;
-  height: 100%;
 }
 
 .pet-card:hover {
@@ -478,11 +486,12 @@ const goToDetail = (id) => {
 
 .status-overlay {
   position: absolute;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   color: #FFFFFF;
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
@@ -492,10 +501,11 @@ const goToDetail = (id) => {
 }
 
 .pet-details {
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 2rem 1.5rem;
   display: flex;
   flex-direction: column;
   flex: 1;
+  justify-content: space-between;
 }
 
 .pet-header {
@@ -510,7 +520,7 @@ const goToDetail = (id) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #111111;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -532,7 +542,7 @@ const goToDetail = (id) => {
 
 .pet-desc {
   font-size: 0.9rem;
-  color: #aaaaaa;
+  color: #2D3748;
   margin: 0 0 1.25rem 0;
   line-clamp: 2;
   display: -webkit-box;
@@ -543,37 +553,38 @@ const goToDetail = (id) => {
   height: 2.7rem;
 }
 
-.specs-grid {
+.pet-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
 
-.spec-item {
+.stat-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #1A1A1A;
+  background-color: #FFFFFF;
   border: 2px solid #000000;
   padding: 0.5rem;
   border-radius: 10px;
 }
 
-.spec-item .icon {
+.stat-item .icon {
   font-size: 1.1rem;
+  color: #111111;
 }
 
-.spec-item .text {
+.stat-item .text {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #dddddd;
+  color: #111111;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.card-actions {
+.pet-actions {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

@@ -48,12 +48,12 @@ const sizeClass = computed(() => `neo-button-${props.size}`);
 
 .neo-button:hover:not(.is-disabled) {
   box-shadow: var(--shadow-neo-hover);
-  transform: translate(-2px, -2px);
+  transform: translateY(-4px);
 }
 
 .neo-button:active:not(.is-disabled) {
   box-shadow: var(--shadow-neo-active);
-  transform: translate(2px, 2px);
+  transform: translateY(1px);
 }
 
 .is-disabled {

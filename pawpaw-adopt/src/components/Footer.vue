@@ -6,25 +6,25 @@
     <div class="container footer-container">
       <div class="footer-content">
         <div class="brand-section">
-          <h2 class="brand-title">Pawpaw Finder</h2>
-          <p class="brand-text">Membantu hewan peliharaan menemukan jalan pulang.</p>
+          <h2 class="brand-title">Pawpaw Adopt</h2>
+          <p class="brand-text">Temukan sahabat bulu baru untuk melengkapi keluarga Anda.</p>
         </div>
         <div class="links-section">
           <h3 class="section-heading">Navigasi</h3>
           <div class="links-grid">
-            <router-link to="/dashboard" class="footer-link">Dashboard</router-link>
-            <router-link to="/explore" class="footer-link">Katalog</router-link>
-            <router-link to="/radar" class="footer-link">Peta Radar</router-link>
-            <router-link to="/report" class="footer-link">Laporkan</router-link>
-            <router-link to="/chat" class="footer-link">Obrolan</router-link>
+            <router-link to="/" class="footer-link">Katalog Adopsi</router-link>
+            <router-link to="/compare" class="footer-link">Bandingkan</router-link>
+            <router-link to="/stories" class="footer-link">Cerita Sukses</router-link>
+            <router-link to="/quiz" class="footer-link">Kuis Adopsi</router-link>
+            <router-link to="/dashboard" class="footer-link">Adopsi Saya</router-link>
             <router-link to="/profile" class="footer-link">Profil</router-link>
-            <router-link to="/adoption" class="footer-link">Portal Adopsi</router-link>
+            <a href="http://localhost:5173" class="footer-link">Pawpaw Finder &rarr;</a>
           </div>
         </div>
       </div>
       <div class="copyright-section">
         <p class="copyright-text">
-          &copy; {{ new Date().getFullYear() }} Pawpaw Finder. Built by 
+          &copy; {{ new Date().getFullYear() }} Pawpaw Adopt. Built by 
           <a href="https://github.com/qdamai" target="_blank" rel="noopener noreferrer" class="creator-link">qdamai</a> 
           and 
           <a href="https://github.com/nazirachrn" target="_blank" rel="noopener noreferrer" class="creator-link">nazirachrn</a>
@@ -37,7 +37,7 @@
 <style scoped>
 .neo-footer {
   background-color: #1a1a1a;
-  border-top: 3px solid #000000;
+  border-top: var(--border-width) solid var(--color-border);
   padding: 3rem 1rem 1.5rem;
   margin-top: 4rem;
   font-family: 'Nunito', sans-serif;

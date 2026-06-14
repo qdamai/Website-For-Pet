@@ -1,25 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg: #121212;
-  --color-card-bg: #262626;
-  --color-primary: #FF8A65;
-  --color-success: #4ADE80;
-  --color-accent-1: #B39DDB;
-  --color-accent-2: #FFF176;
-  --color-text: #FFFFFF;
-  --color-text-dark: #1A1A1A;
-  --color-border: #000000;
+  --color-bg: #FFF8F3; /* Soft peach/cream background */
+  --color-card-bg: #FFFFFF;
+  --color-primary: #5CE1E6; /* Soft Mint Green */
+  --color-success: #6EE7B7;
+  --color-accent-1: #FF8C66; /* Soft Terracotta/Warm Coral */
+  --color-accent-2: #FDE047;
+  --color-text: #4B5563; /* Softer dark gray */
+  --color-text-dark: #1A1A1A; /* Strong black for contrast */
+  --color-border: #000000; /* Neo-brutalism border */
   
-  --border-width: 3px;
+  --border-width: 2px;
   --radius-sm: 12px;
   --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
   
-  --shadow-neo: 4px 4px 0px #000000;
-  --shadow-neo-hover: 6px 6px 0px #000000;
-  --shadow-neo-active: 2px 2px 0px #000000;
+  /* Neo-Brutalism Shadows */
+  --shadow-neo: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-neo-hover: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-neo-active: 0px 0px 0px 0px rgba(0, 0, 0, 1);
+}
+
+[data-theme='dark'] {
+  --color-bg: #111827; /* Deep slate */
+  --color-card-bg: #1F2937;
+  --color-text: #F9FAFB;
+  --color-text-dark: #FFFFFF;
+  --color-border: #FFFFFF; /* White borders for dark mode neo-brutalism */
+  --shadow-neo: 4px 4px 0px 0px rgba(255, 255, 255, 0.8);
+  --shadow-neo-hover: 6px 6px 0px 0px rgba(255, 255, 255, 0.8);
+  --shadow-neo-active: 0px 0px 0px 0px rgba(255, 255, 255, 0.8);
+}
+
+[data-theme='dark'] .neo-navbar {
+  background-color: rgba(17, 24, 39, 0.85) !important;
 }
 
 * {
@@ -31,7 +47,7 @@
 body {
   font-family: 'Fredoka', 'Nunito', 'Poppins', sans-serif;
   background-color: var(--color-bg);
-  color: var(--color-text);
+  color: var(--color-text-dark);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -63,15 +79,22 @@ input, textarea, button, select {
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-card-bg);
-  color: var(--color-text);
-  transition: all 0.2s ease-in-out;
+  color: var(--color-text-dark);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
-  font-weight: 700;
+  font-weight: 600;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
 }
 
-.neo-input:focus {
-  box-shadow: var(--shadow-neo);
-  transform: translate(-2px, -2px);
+
+.neo-input::placeholder {
+  color: #9CA3AF;
+  font-weight: 500;
+}
+\n.neo-input:focus {
+  box-shadow: 0 0 0 3px rgba(255, 154, 118, 0.3);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 /* Fix Chrome Autofill in Dark Mode */
@@ -129,4 +152,56 @@ input:-webkit-autofill:active{
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+
+/* Skeleton Loading Effect */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-card-bg) 25%, #e5e7eb 50%, var(--color-card-bg) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+[data-theme='dark'] .skeleton {
+  background: linear-gradient(90deg, var(--color-card-bg) 25%, #374151 50%, var(--color-card-bg) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 1.25rem;
+  width: 100%;
+  border-radius: 4px;
+  border: none;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+}
+
+[data-theme='dark'] .skeleton-text {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+.skeleton-title {
+  height: 2rem;
+  width: 60%;
+  margin-bottom: 0.5rem;
+}
+.skeleton-img {
+  height: 200px;
+  width: 100%;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.skeleton-btn {
+  height: 2.5rem;
+  width: 100%;
+  border-radius: var(--radius-md);
 }

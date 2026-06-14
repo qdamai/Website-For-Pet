@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, setDoc, query, limit, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, query, limit, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 // Helper to generate a random item from array
@@ -64,12 +64,12 @@ const colors = ["Orange", "Cream", "Hitam Putih", "Abu-abu Putih", "Putih Kuning
 const cities = ["Padang", "Padang Panjang", "Bukittinggi", "Solok", "Payakumbuh", "Pariaman"];
 
 // 1. Seed Users (50 Adopter, 10 Shelter, 3 Admin Demo)
-export const seedUsers = async () => {
-  const usersRef = collection(db, 'users');
+export const seedUsers = async (force = false) => {
+  const usersRef = collection(db, 'finder_users');
   const snap = await getDocs(query(usersRef, limit(10)));
   
   // If we already have seeded users (greater than standard demo users)
-  if (snap.size > 5) {
+  if (!force && snap.size > 5) {
     return { success: false, message: "Data sudah tersedia" };
   }
 
@@ -111,7 +111,7 @@ export const seedUsers = async () => {
   ];
 
   for (const admin of admins) {
-    await setDoc(doc(db, 'users', admin.uid), admin);
+    await setDoc(doc(db, 'finder_users', admin.uid), admin);
   }
 
   // 10 Shelters
@@ -128,7 +128,7 @@ export const seedUsers = async () => {
       location: randomChoice(cities),
       createdAt: serverTimestamp()
     };
-    await setDoc(doc(db, 'users', sUid), userShelter);
+    await setDoc(doc(db, 'finder_users', sUid), userShelter);
 
     const shelterDetail = {
       id: `shelter_info_${i}`,
@@ -141,7 +141,7 @@ export const seedUsers = async () => {
       userId: sUid,
       createdAt: serverTimestamp()
     };
-    await setDoc(doc(db, 'shelters', shelterDetail.id), shelterDetail);
+    await setDoc(doc(db, 'adopt_shelters', shelterDetail.id), shelterDetail);
   }
 
   // 50 Adopters
@@ -158,11 +158,11 @@ export const seedUsers = async () => {
       location: randomChoice(cities),
       createdAt: serverTimestamp()
     };
-    await setDoc(doc(db, 'users', aUid), userAdopter);
+    await setDoc(doc(db, 'finder_users', aUid), userAdopter);
   }
 
   // Seed default user Rafi
-  await setDoc(doc(db, 'users', 'user1'), {
+  await setDoc(doc(db, 'finder_users', 'user1'), {
     uid: 'user1',
     fullname: 'Rafi',
     email: 'rafi@pawpaw.com',
@@ -178,8 +178,8 @@ export const seedUsers = async () => {
 };
 
 // 2. Seed Adoption Pets (100 pets: 50 cats, 30 dogs, 10 rabbits, 5 birds, 5 hamsters)
-export const seedAdoptionPets = async () => {
-  const ref = collection(db, 'adoption_pets');
+export const seedAdoptionPets = async (force = false) => {
+  const ref = collection(db, 'adopt_pets');
   const snap = await getDocs(query(ref, limit(5)));
   
   if (snap.size > 0) {
@@ -247,7 +247,7 @@ export const seedAdoptionPets = async () => {
   const allPets = [...cats, ...dogs, ...rabbits, ...birds, ...hamsters];
 
   for (const pet of allPets) {
-    await setDoc(doc(db, 'adoption_pets', pet.id), pet);
+    await setDoc(doc(db, 'adopt_pets', pet.id), pet);
     
     // Seed matching initial health records
     const hrId = `hr_seed_${pet.id}`;
@@ -266,8 +266,8 @@ export const seedAdoptionPets = async () => {
 };
 
 // 3. Seed Adoption Requests (200 requests)
-export const seedAdoptionRequests = async () => {
-  const ref = collection(db, 'adoption_requests');
+export const seedAdoptionRequests = async (force = false) => {
+  const ref = collection(db, 'adopt_requests');
   const snap = await getDocs(query(ref, limit(5)));
 
   if (snap.size > 0) {
@@ -314,12 +314,12 @@ export const seedAdoptionRequests = async () => {
       shelterId: `shelter_${Math.floor(Math.random() * 10) + 1}`
     };
 
-    await setDoc(doc(db, 'adoption_requests', reqId), reqData);
+    await setDoc(doc(db, 'adopt_requests', reqId), reqData);
 
     // If request status is Adopted or Reserved, update the pet doc
     if (status === 'Adopted' || status === 'Approved') {
       try {
-        const petRef = doc(db, 'adoption_pets', `pet_adopt_${petNum}`);
+        const petRef = doc(db, 'adopt_pets', `pet_adopt_${petNum}`);
         await updateDoc(petRef, {
           status: status === 'Adopted' ? 'Adopted' : 'Reserved'
         });
@@ -331,7 +331,7 @@ export const seedAdoptionRequests = async () => {
     // Seed Appointments for Interview Scheduled / Completed statuses
     if (status === 'Interview Scheduled' || status === 'Interview Completed') {
       const aptId = `apt_seed_${i}`;
-      await setDoc(doc(db, 'appointments', aptId), {
+      await setDoc(doc(db, 'adopt/data/appointments', aptId), {
         id: aptId,
         type: 'Interview',
         petId: reqData.petId,
@@ -353,8 +353,8 @@ export const seedAdoptionRequests = async () => {
 };
 
 // 4. Seed Success Stories (20 Cerita Sukses)
-export const seedSuccessStories = async () => {
-  const ref = collection(db, 'success_stories');
+export const seedSuccessStories = async (force = false) => {
+  const ref = collection(db, 'adopt_stories');
   const snap = await getDocs(query(ref, limit(5)));
 
   if (snap.size > 0) {
@@ -382,15 +382,15 @@ export const seedSuccessStories = async () => {
       photo: choice.photo,
       createdAt: new Date(Date.now() - Math.random() * 100 * 24 * 60 * 60 * 1000).toISOString()
     };
-    await setDoc(doc(db, 'success_stories', id), storyData);
+    await setDoc(doc(db, 'adopt_stories', id), storyData);
   }
 
   return { success: true, message: "Berhasil menanam data dummy" };
 };
 
 // 5. Seed Notifications (100 Notifikasi)
-export const seedNotifications = async () => {
-  const ref = collection(db, 'notifications');
+export const seedNotifications = async (force = false) => {
+  const ref = collection(db, 'adopt_notifications');
   const snap = await getDocs(query(ref, limit(5)));
 
   if (snap.size > 0) {
@@ -427,27 +427,108 @@ export const seedNotifications = async () => {
       createdAt: serverTimestamp()
     };
 
-    await setDoc(doc(db, 'notifications', id), notifData);
+    await setDoc(doc(db, 'adopt_notifications', id), notifData);
   }
 
   return { success: true, message: "Berhasil menanam data dummy" };
 };
 
-// 6. Seed All Data
-export const seedAllData = async () => {
-  const resUsers = await seedUsers();
-  const resPets = await seedAdoptionPets();
-  const resRequests = await seedAdoptionRequests();
-  const resStories = await seedSuccessStories();
-  const resNotif = await seedNotifications();
+// 6. Seed All Finder Data
+export const seedAllFinderData = async (force = true) => {
+  const resUsers = await seedUsers(force);
+  
+  // Seeds lost/found pets
+  try {
+    const lostPetsData = [
+      {
+        petId: 'pet_milo_01',
+        userId: 'user1',
+        name: 'Milo',
+        type: 'Kucing',
+        breed: 'Persia',
+        color: 'Orange',
+        age: '2 Tahun',
+        gender: 'Jantan',
+        photo: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba',
+        lastLocation: 'Padang',
+        lat: -0.947083,
+        lng: 100.351111,
+        lostDate: new Date().toISOString().split('T')[0],
+        description: 'Milo hilang di sekitar taman kota.',
+        contact: '085311223344',
+        status: 'Missing',
+        createdAt: serverTimestamp()
+      },
+      {
+        petId: 'pet_bruno_01',
+        userId: 'admin2',
+        name: 'Bruno',
+        type: 'Anjing',
+        breed: 'Golden Retriever',
+        color: 'Cream',
+        age: '3 Tahun',
+        gender: 'Jantan',
+        photo: 'https://images.unsplash.com/photo-1552053831-71594a27632d',
+        lastLocation: 'Padang Panjang',
+        lat: -0.4636,
+        lng: 100.3986,
+        lostDate: new Date().toISOString().split('T')[0],
+        description: 'Bruno memakai kalung biru.',
+        contact: '081298765432',
+        status: 'Missing',
+        createdAt: serverTimestamp()
+      }
+    ];
 
-  const allSuccess = resUsers.success || resPets.success || resRequests.success || resStories.success || resNotif.success;
+    for (const pet of lostPetsData) {
+      await setDoc(doc(db, 'finder_lost_pets', pet.petId), pet);
+    }
 
-  if (allSuccess) {
-    return { success: true, message: "Berhasil menanam data dummy" };
-  } else {
-    return { success: false, message: "Data sudah tersedia" };
+    const foundPetsData = [
+      {
+        reportId: 'rep_01',
+        userId: 'user1',
+        type: 'Kucing',
+        color: 'Orange',
+        foundLocation: 'Padang (Pantai Purus)',
+        lat: -0.9329,
+        lng: 100.3475,
+        foundDate: new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        photo: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5',
+        description: 'Ditemukan kucing mirip persia.',
+        status: 'Verified',
+        createdAt: serverTimestamp()
+      },
+      {
+        reportId: 'rep_02',
+        userId: 'admin2',
+        type: 'Anjing',
+        color: 'Coklat Muda',
+        foundLocation: 'Bukittinggi',
+        lat: -0.3060,
+        lng: 100.3705,
+        foundDate: new Date().toISOString().split('T')[0],
+        photo: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee',
+        description: 'Anjing liar yang kelaparan di pinggir jalan raya.',
+        status: 'Verified',
+        createdAt: serverTimestamp()
+      }
+    ];
+
+    for (const report of foundPetsData) {
+      await setDoc(doc(db, 'finder_found_pets', report.reportId), report);
+    }
+
+    return { success: true, message: "Berhasil menanam data dummy Finder" };
+  } catch (error) {
+    console.error("Error original seeder", error);
+    return { success: false, message: "Gagal: " + error.message };
+    return { success: false, message: "Gagal: " + error.message };
   }
+};
+
+export const seedAllData = async (force = true) => {
+  return await seedAllFinderData(force);
 };
 
 // Retro-compatible original seeder bypass
@@ -492,7 +573,7 @@ export const forceSeedDatabase = async () => {
     ];
 
     for (const user of usersData) {
-      await setDoc(doc(db, 'users', user.uid), user);
+      await setDoc(doc(db, 'finder_users', user.uid), user);
     }
 
     const lostPetsData = [
@@ -537,7 +618,7 @@ export const forceSeedDatabase = async () => {
     ];
 
     for (const pet of lostPetsData) {
-      await setDoc(doc(db, 'lost_pets', pet.petId), pet);
+      await setDoc(doc(db, 'finder_lost_pets', pet.petId), pet);
     }
 
     const foundPetsData = [
@@ -572,17 +653,18 @@ export const forceSeedDatabase = async () => {
     ];
 
     for (const report of foundPetsData) {
-      await setDoc(doc(db, 'found_pets', report.reportId), report);
+      await setDoc(doc(db, 'finder_found_pets', report.reportId), report);
     }
 
     // Run adoption seeder too
-    await seedUsers();
+    await seedUsers(true);
     await seedAdoptionPets();
     await seedAdoptionRequests();
     await seedSuccessStories();
-    await seedNotifications();
+    await seedNotifications(true);
 
     console.log("Database reset + seeder run successfully.");
+    return { success: true, message: "Berhasil menanam seluruh data!" };
   } catch (error) {
     console.error("Error original seeder", error);
   }
@@ -590,7 +672,7 @@ export const forceSeedDatabase = async () => {
 
 export const seedDatabase = async () => {
   try {
-    const usersSnapshot = await getDocs(collection(db, 'users'));
+    const usersSnapshot = await getDocs(collection(db, 'finder_users'));
     if (usersSnapshot.empty) {
       await forceSeedDatabase();
     } else {
@@ -598,5 +680,26 @@ export const seedDatabase = async () => {
     }
   } catch (error) {
     console.error('Error during auto-seeding:', error);
+  }
+};
+
+
+export const clearAllData = async () => {
+  try {
+    const collectionsToClear = [
+      'adopt_users', 'adopt_pets', 'adopt_requests', 'adopt_stories', 
+      'adopt_notifications', 'adopt_shelters', 'finder_lost_pets', 
+      'finder_found_pets', 'finder_users', 'notifications', 'chats', 'finder_chats'
+    ];
+    for (const colName of collectionsToClear) {
+      const snap = await getDocs(collection(db, colName));
+      for (const d of snap.docs) {
+        await deleteDoc(doc(db, colName, d.id));
+      }
+    }
+    return { success: true, message: 'Seluruh data seeding berhasil dihapus secara permanen dari database.' };
+  } catch (error) {
+    console.error('Error clearing data:', error);
+    return { success: false, message: 'Gagal menghapus data: ' + error.message };
   }
 };

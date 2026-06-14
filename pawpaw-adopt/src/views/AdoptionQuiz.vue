@@ -2,7 +2,7 @@
   <div class="quiz-container">
     
     <div class="quiz-header">
-      <h1 class="quiz-title">Cari Jodoh Anabul 🎯</h1>
+      <h1 class="quiz-title">Cari Jodoh Anabul <Target :size="18" class="inline" /></h1>
       <p class="quiz-subtitle">Jawab beberapa pertanyaan berikut untuk mencocokkan gaya hidup Anda dengan anabul yang paling sesuai!</p>
     </div>
 
@@ -30,6 +30,7 @@
             class="btn-neo btn-option"
           >
             {{ opt.text }}
+            <PawPrint v-if="opt.hasPawPrint" :size="18" class="inline ml-1" />
           </button>
         </div>
       </div>
@@ -38,7 +39,7 @@
     <!-- Results Panel -->
     <div v-else class="results-layout">
       <div class="results-header-card">
-        <span class="confetti">🎉</span>
+        <span class="confetti"><PartyPopper class="inline" /></span>
         <h2 class="results-title">Anabul yang Paling Cocok untuk Anda</h2>
         <p class="results-subtitle">Berdasarkan profil tempat tinggal, tingkat aktivitas harian, anggaran, dan pengalaman Anda.</p>
         <button @click="resetQuiz" class="btn-neo btn-reset">Ulangi Kuis</button>
@@ -52,7 +53,7 @@
       <!-- Empty Matches fallback -->
       <div v-else-if="recommendedPets.length === 0" class="empty-matches-card">
         <p class="text-gray mb-4">Tidak ditemukan kecocokan spesifik saat ini. Silakan telusuri katalog utama untuk melihat semua pilihan.</p>
-        <router-link to="/adoption" class="btn-neo btn-catalog-link">Lihat Semua Katalog</router-link>
+        <router-link to="/" class="btn-neo btn-catalog-link">Lihat Semua Katalog</router-link>
       </div>
 
       <!-- Match Cards Grid -->
@@ -65,7 +66,7 @@
         >
           <div class="match-img-wrapper">
             <img :src="pet.photo" :alt="pet.name" class="match-img" />
-            <span class="match-badge">99% Cocok 💖</span>
+            <span class="match-badge">99% Cocok <Heart :size="18" class="inline" /></span>
           </div>
 
           <div class="match-details">
@@ -76,8 +77,8 @@
             </div>
             
             <div class="match-specs">
-              <span>📍 {{ pet.location }}</span>
-              <span>🎂 {{ pet.age }} Tahun</span>
+              <span><MapPin :size="18" class="inline" /> {{ pet.location }}</span>
+              <span><Cake :size="18" class="inline" /> {{ pet.age }} Tahun</span>
             </div>
 
             <button @click.stop="goToDetail(pet.id)" class="btn-neo btn-match-detail">
@@ -92,6 +93,7 @@
 </template>
 
 <script setup>
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon, Building, Activity, User, TreePine, Banknote, Coins, PartyPopper, Wallet, Armchair, Footprints } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, getDocs, query, limit } from 'firebase/firestore';
@@ -111,35 +113,35 @@ const questions = [
     key: 'dwelling',
     text: 'Di mana tempat tinggal Anda saat ini?',
     options: [
-      { text: 'Apartemen / Kost 🏢', value: 'apartment' },
-      { text: 'Rumah dengan Halaman Kecil 🏡', value: 'house_small' },
-      { text: 'Rumah dengan Halaman Luas 🏞️', value: 'house_large' }
+      { text: 'Apartemen / Kost', value: 'apartment' },
+      { text: 'Rumah dengan Halaman Kecil', value: 'house_small' },
+      { text: 'Rumah dengan Halaman Luas', value: 'house_large' }
     ]
   },
   {
     key: 'activity',
     text: 'Bagaimana tingkat aktivitas fisik harian Anda?',
     options: [
-      { text: 'Sangat Aktif (Suka Olahraga / Berlari) 🏃‍♂️', value: 'high' },
-      { text: 'Sedang (Jalan Santai sore hari) 🚶‍♀️', value: 'medium' },
-      { text: 'Kurang Aktif (Bekerja didepan laptop / Rebahan) 🛋️', value: 'low' }
+      { text: 'Sangat Aktif (Suka Olahraga / Berlari)', value: 'high' },
+      { text: 'Sedang (Jalan Santai sore hari)', value: 'medium' },
+      { text: 'Kurang Aktif (Bekerja didepan laptop / Rebahan)', value: 'low' }
     ]
   },
   {
     key: 'experience',
     text: 'Apakah Anda memiliki pengalaman memelihara hewan peliharaan sebelumnya?',
     options: [
-      { text: 'Belum Pernah (Pemula) 🔰', value: 'beginner' },
-      { text: 'Pernah Memelihara Sebelumnya (Berpengalaman) 🐾', value: 'experienced' }
+      { text: 'Belum Pernah (Pemula)', value: 'beginner' },
+      { text: 'Pernah Memelihara Sebelumnya (Berpengalaman)', value: 'experienced', hasPawPrint: true }
     ]
   },
   {
     key: 'budget',
     text: 'Berapa anggaran bulanan maksimal yang Anda siapkan untuk anabul?',
     options: [
-      { text: 'Di bawah Rp 300 Ribu / Bulan 💸', value: 'low' },
-      { text: 'Rp 300 Ribu - Rp 1 Juta / Bulan 💵', value: 'medium' },
-      { text: 'Di atas Rp 1 Juta / Bulan 💰', value: 'high' }
+      { text: 'Di bawah Rp 300 Ribu / Bulan', value: 'low' },
+      { text: 'Rp 300 Ribu - Rp 1 Juta / Bulan', value: 'medium' },
+      { text: 'Di atas Rp 1 Juta / Bulan', value: 'high' }
     ]
   }
 ];
@@ -150,7 +152,7 @@ onMounted(async () => {
 
 const fetchPetsForMatching = async () => {
   try {
-    const q = query(collection(db, 'adoption_pets'));
+    const q = query(collection(db, 'adopt_pets'));
     const snap = await getDocs(q);
     allPets.value = snap.docs.map(doc => doc.data());
   } catch (err) {
@@ -207,7 +209,7 @@ const resetQuiz = () => {
 };
 
 const goToDetail = (id) => {
-  router.push(`/adoption/pet/${id}`);
+  router.push(`/pet/${id}`);
 };
 </script>
 
@@ -230,31 +232,31 @@ const goToDetail = (id) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin: 0;
 }
 
 .quiz-subtitle {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin-top: 0.5rem;
 }
 
 /* Quiz Card */
 .quiz-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2.5rem;
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .progress-container {
   width: 100%;
   height: 10px;
   background-color: #121212;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 99px;
   overflow: hidden;
   margin-bottom: 1rem;
@@ -285,7 +287,7 @@ const goToDetail = (id) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.75rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin-bottom: 2rem;
 }
 
@@ -297,8 +299,8 @@ const goToDetail = (id) => {
 
 .btn-option {
   background-color: #1a1a1a;
-  color: #ffffff;
-  border-color: #000000;
+  color: #FFFFFF;
+  border-color: var(--color-border);
   text-align: left;
   padding: 1.15rem 1.5rem;
   font-size: 1rem;
@@ -319,11 +321,11 @@ const goToDetail = (id) => {
 
 .results-header-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 3rem 2rem;
   text-align: center;
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .confetti {
@@ -336,14 +338,14 @@ const goToDetail = (id) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin: 0;
 }
 
 .results-subtitle {
   font-size: 1rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin: 0.5rem 0 2rem 0;
 }
 
@@ -354,11 +356,11 @@ const goToDetail = (id) => {
 
 .empty-matches-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 3rem;
   text-align: center;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .btn-catalog-link {
@@ -375,24 +377,24 @@ const goToDetail = (id) => {
 
 .match-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .match-card:hover {
   transform: translateY(-4px);
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .match-img-wrapper {
   height: 200px;
-  border-bottom: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
   position: relative;
   background-color: #1A1A1A;
 }
@@ -409,12 +411,12 @@ const goToDetail = (id) => {
   left: 1rem;
   background-color: #4ADE80;
   color: #1A1A1A;
-  border: 2px solid #000000;
-  border-radius: 8px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 800;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: var(--shadow-neo-active);
 }
 
 .match-details {
@@ -428,14 +430,14 @@ const goToDetail = (id) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin: 0;
 }
 
 .match-breed {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin: 0.15rem 0 0.75rem 0;
 }
 

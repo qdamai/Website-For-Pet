@@ -84,15 +84,16 @@
     <div class="adoption-banner bg-blue">
       <h3 class="banner-title">Ingin Memelihara Hewan?</h3>
       <p class="banner-subtitle">{{ langStore.t('adoptSub') }}</p>
-      <router-link to="/adoption" style="text-decoration: none;">
+      <a :href="adoptUrl" style="text-decoration: none;">
         <button class="btn-adopt">{{ langStore.t('adoptBtn') }}</button>
-      </router-link>
+      </a>
     </div>
 
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { useLangStore } from '../stores/lang';
@@ -102,6 +103,9 @@ import { db } from '../firebase/config';
 const router = useRouter();
 const authStore = useAuthStore();
 const langStore = useLangStore();
+const adoptUrl = computed(() => {
+  return window.location.protocol + '//' + window.location.hostname + ':5174/';
+});
 
 
 
@@ -116,7 +120,7 @@ const startAdminChat = async () => {
   const adminId = 'admin_support_pawpaw';
   const chatId = `support_${authStore.user.uid}`;
   
-  const chatRef = doc(db, 'chats', chatId);
+  const chatRef = doc(db, 'finder_chats', chatId);
   const snap = await getDoc(chatRef);
   
   if (!snap.exists()) {
@@ -160,14 +164,18 @@ const startAdminChat = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark, #1A1A1A);
   margin: 0 0 0.25rem 0;
+}
+
+[data-theme='dark'] .header-title {
+  color: #FFFFFF;
 }
 
 .header-subtitle {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -180,9 +188,9 @@ const startAdminChat = async () => {
   font-family: 'Fredoka', 'Nunito', sans-serif;
   font-weight: 800;
   padding: 0.75rem 1.5rem;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
@@ -194,7 +202,7 @@ const startAdminChat = async () => {
 
 .btn-admin:hover, .btn-logout:hover, .btn-adopt:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .btn-admin:active, .btn-logout:active, .btn-adopt:active {
@@ -212,14 +220,14 @@ const startAdminChat = async () => {
 
 /* Stat Cards */
 .stat-card {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 9999px;
   padding: 2.5rem 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   text-align: center;
 }
 
@@ -246,56 +254,65 @@ const startAdminChat = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark, #1A1A1A);
   margin-bottom: 1.5rem;
+}
+
+[data-theme='dark'] .section-title {
+  color: #FFFFFF;
 }
 
 /* Action Cards */
 .action-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .action-card:hover {
   transform: translateY(-4px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .icon-circle {
   width: 72px;
   height: 72px;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .action-title {
+  font-family: 'Fredoka', sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark, #1A1A1A);
   margin: 0;
+}
+
+[data-theme='dark'] .action-title {
+  color: #FFFFFF;
 }
 
 /* Banner */
 .adoption-banner {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 32px;
   padding: 3rem 2rem;
   text-align: center;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   margin-top: 1rem;
 }
 

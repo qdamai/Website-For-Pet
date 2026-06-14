@@ -11,6 +11,8 @@ const routes = [
   { path: '/dashboard', name: 'AdoptionDashboard', component: () => import('../views/AdoptionDashboard.vue'), meta: { requiresAuth: true } },
   { path: '/auth', name: 'Auth', component: () => import('../views/Auth.vue') }, // Auth page for login/register
   { path: '/profile', name: 'Profile', component: () => import('../views/Profile.vue'), meta: { requiresAuth: true } },
+  { path: '/upload', name: 'AdoptionUpload', component: () => import('../views/AdoptionUpload.vue'), meta: { requiresAuth: true } },
+  { path: '/admin', name: 'AdminPanel', component: () => import('../views/AdminPanel.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
 ];
 
 export const router = createRouter({

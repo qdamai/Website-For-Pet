@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, setDoc, query, limit, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, query, limit, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 // Helper to generate a random item from array
@@ -64,12 +64,12 @@ const colors = ["Orange", "Cream", "Hitam Putih", "Abu-abu Putih", "Putih Kuning
 const cities = ["Padang", "Padang Panjang", "Bukittinggi", "Solok", "Payakumbuh", "Pariaman"];
 
 // 1. Seed Users (50 Adopter, 10 Shelter, 3 Admin Demo)
-export const seedUsers = async () => {
+export const seedUsers = async (force = false) => {
   const usersRef = collection(db, 'users');
   const snap = await getDocs(query(usersRef, limit(10)));
   
   // If we already have seeded users (greater than standard demo users)
-  if (snap.size > 5) {
+  if (!force && snap.size > 5) {
     return { success: false, message: "Data sudah tersedia" };
   }
 
@@ -178,7 +178,7 @@ export const seedUsers = async () => {
 };
 
 // 2. Seed Adoption Pets (100 pets: 50 cats, 30 dogs, 10 rabbits, 5 birds, 5 hamsters)
-export const seedAdoptionPets = async () => {
+export const seedAdoptionPets = async (force = false) => {
   const ref = collection(db, 'adoption_pets');
   const snap = await getDocs(query(ref, limit(5)));
   
@@ -266,7 +266,7 @@ export const seedAdoptionPets = async () => {
 };
 
 // 3. Seed Adoption Requests (200 requests)
-export const seedAdoptionRequests = async () => {
+export const seedAdoptionRequests = async (force = false) => {
   const ref = collection(db, 'adoption_requests');
   const snap = await getDocs(query(ref, limit(5)));
 
@@ -353,7 +353,7 @@ export const seedAdoptionRequests = async () => {
 };
 
 // 4. Seed Success Stories (20 Cerita Sukses)
-export const seedSuccessStories = async () => {
+export const seedSuccessStories = async (force = false) => {
   const ref = collection(db, 'success_stories');
   const snap = await getDocs(query(ref, limit(5)));
 
@@ -389,7 +389,7 @@ export const seedSuccessStories = async () => {
 };
 
 // 5. Seed Notifications (100 Notifikasi)
-export const seedNotifications = async () => {
+export const seedNotifications = async (force = false) => {
   const ref = collection(db, 'notifications');
   const snap = await getDocs(query(ref, limit(5)));
 
@@ -576,15 +576,17 @@ export const forceSeedDatabase = async () => {
     }
 
     // Run adoption seeder too
-    await seedUsers();
-    await seedAdoptionPets();
-    await seedAdoptionRequests();
-    await seedSuccessStories();
-    await seedNotifications();
+    await seedUsers(true);
+    await seedAdoptionPets(true);
+    await seedAdoptionRequests(true);
+    await seedSuccessStories(true);
+    await seedNotifications(true);
 
     console.log("Database reset + seeder run successfully.");
+    return { success: true, message: "Berhasil menanam data dummy" };
   } catch (error) {
     console.error("Error original seeder", error);
+    return { success: false, message: error.message };
   }
 };
 

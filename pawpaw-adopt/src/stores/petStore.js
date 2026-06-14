@@ -14,7 +14,7 @@ export const usePetStore = defineStore('pet', {
       this.loading = true;
       this.error = null;
       try {
-        const q = query(collection(db, 'lost_pets'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'finder_lost_pets'), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         this.lostPets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       } catch (err) {
@@ -28,7 +28,7 @@ export const usePetStore = defineStore('pet', {
       this.loading = true;
       this.error = null;
       try {
-        const q = query(collection(db, 'found_pets'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'finder_found_pets'), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         this.foundPets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       } catch (err) {

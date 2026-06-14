@@ -73,7 +73,7 @@
               style="background-color: #FFF176; color: #1A1A1A; border-color: #000000; margin-top: 0.5rem;"
               @click="transferToAdoption"
             >
-              Pindahkan ke Adopsi 🔄
+              Pindahkan ke Adopsi <RefreshCcw class="inline" />
             </NeoButton>
           </div>
         </NeoCard>
@@ -118,6 +118,8 @@
 </template>
 
 <script setup>
+import { RefreshCcw } from 'lucide-vue-next';
+
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getPetFallbackImage } from '../utils/helpers';
@@ -300,13 +302,13 @@ const startChat = async () => {
   
   // Create or get chat room deterministically with pet ID
   const chatId = `report_${id}_${[authStore.user.uid, pet.value.userId].sort().join('_')}`;
-  const chatRef = doc(db, 'chats', chatId);
+  const chatRef = doc(db, 'finder_chats', chatId);
   
   const snap = await getDoc(chatRef);
   if (!snap.exists()) {
     let recipientName = 'User';
     try {
-      const recipientSnap = await getDoc(doc(db, 'users', pet.value.userId));
+      const recipientSnap = await getDoc(doc(db, 'finder_users', pet.value.userId));
       if (recipientSnap.exists()) {
         recipientName = recipientSnap.data().fullname || 'User';
       }
@@ -379,8 +381,8 @@ const transferToAdoption = async () => {
         createdAt: serverTimestamp()
       };
 
-      await setDoc(doc(db, 'adoption_pets', adpId), petDoc);
-      await updateDoc(doc(db, 'found_pets', id), {
+      await setDoc(doc(db, 'adopt_pets', adpId), petDoc);
+      await updateDoc(doc(db, 'finder_found_pets', id), {
         status: 'Transferred'
       });
 
@@ -420,7 +422,7 @@ const transferToAdoption = async () => {
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
   font-weight: 800;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -439,10 +441,10 @@ const transferToAdoption = async () => {
 }
 
 .neo-detail-item {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 3px 3px 0px #000000;
+  box-shadow: var(--shadow-neo);
   color: #1A1A1A;
 }
 
@@ -500,7 +502,7 @@ const transferToAdoption = async () => {
   border: 4px solid #000000;
   border-radius: 16px;
   padding: 2.5rem 2rem;
-  box-shadow: 8px 8px 0px #000000;
+  box-shadow: var(--shadow-neo);
   position: relative;
 }
 

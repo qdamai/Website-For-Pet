@@ -60,15 +60,16 @@
       </button>
 
       <!-- Adoption CTA Button -->
-      <router-link to="/adoption" class="adoption-cta-button">
-        Adopsi Hewan 🐾
-      </router-link>
+      <a href="http://localhost:5173/" class="adoption-cta-button">
+        Adopsi Hewan <PawPrint :size="18" class="inline" />
+      </a>
 
     </div>
   </div>
 </template>
 
 <script setup>
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();

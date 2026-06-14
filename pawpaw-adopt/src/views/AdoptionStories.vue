@@ -3,7 +3,7 @@
     
     <div class="stories-header">
       <div>
-        <h1 class="stories-title">Kisah Sukses Adopsi 💖</h1>
+        <h1 class="stories-title">Kisah Sukses Adopsi <Heart :size="18" class="inline" /></h1>
         <p class="stories-subtitle">Kumpulan cerita hangat dan menginspirasi dari keluarga baru yang dipertemukan lewat Pawpaw Finder.</p>
       </div>
       <button 
@@ -21,7 +21,7 @@
     </div>
 
     <div v-else-if="stories.length === 0" class="empty-stories-card">
-      <span class="icon">💖</span>
+      <span class="icon"><Heart :size="18" class="inline" /></span>
       <h3 class="card-title mt-4">Belum Ada Kisah Sukses</h3>
       <p class="text-gray mb-4">Jadilah yang pertama untuk menceritakan momen bahagia adopsi anabul Anda di sini!</p>
     </div>
@@ -42,7 +42,7 @@
           <p class="story-author">Ditulis oleh: <b>{{ story.adopterName || 'Anonim' }}</b> &bull; {{ formatDate(story.createdAt) }}</p>
           
           <div class="story-pet-bar">
-            <span>🐾 Nama Anabul: <b>{{ story.petName || 'Anabul' }}</b></span>
+            <span><PawPrint :size="18" class="inline" /> Nama Anabul: <b>{{ story.petName || 'Anabul' }}</b></span>
           </div>
 
           <p class="story-text">{{ story.story }}</p>
@@ -95,6 +95,7 @@
 </template>
 
 <script setup>
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
 import { collection, getDocs, setDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -122,7 +123,7 @@ onMounted(async () => {
 const fetchStories = async () => {
   loading.value = true;
   try {
-    const q = query(collection(db, 'success_stories'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'adopt_stories'), orderBy('createdAt', 'desc'));
     const snap = await getDocs(q);
     stories.value = snap.docs.map(doc => doc.data());
   } catch (err) {
@@ -153,7 +154,7 @@ const submitStory = async () => {
       createdAt: new Date().toISOString()
     };
 
-    await setDoc(doc(db, 'success_stories', storyId), newStory);
+    await setDoc(doc(db, 'adopt_stories', storyId), newStory);
     alert("Kisah bahagia Anda berhasil dibagikan! Terima kasih telah menginspirasi!");
     
     // Reset form and modal
@@ -198,14 +199,18 @@ const submitStory = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark, #1A1A1A);
   margin: 0;
+}
+
+[data-theme='dark'] .stories-title {
+  color: var(--color-text-dark);
 }
 
 .stories-subtitle {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin-top: 0.5rem;
   max-width: 700px;
 }
@@ -216,21 +221,21 @@ const submitStory = async () => {
   padding: 0.75rem 1.5rem;
   background-color: #FF8A65;
   color: #1A1A1A;
-  border: 3px solid #000000;
-  border-radius: 12px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
 }
 
 .btn-neo:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .btn-neo:active {
-  transform: translate(2px, 2px);
+  transform: translateY(1px);
   box-shadow: none;
 }
 
@@ -241,10 +246,10 @@ const submitStory = async () => {
 /* Empty State */
 .empty-stories-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 4rem 2rem;
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: var(--shadow-neo-hover);
   text-align: center;
 }
 
@@ -257,11 +262,15 @@ const submitStory = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark, #1A1A1A);
+}
+
+[data-theme='dark'] .empty-stories-card .card-title {
+  color: var(--color-text-dark);
 }
 
 .text-gray {
-  color: #aaaaaa;
+  color: var(--color-text);
   font-weight: 600;
 }
 
@@ -276,10 +285,10 @@ const submitStory = async () => {
   display: grid;
   grid-template-columns: 1fr;
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: var(--shadow-neo-hover);
 }
 
 @media (min-width: 768px) {
@@ -292,14 +301,14 @@ const submitStory = async () => {
   height: 250px;
   position: relative;
   background-color: #1A1A1A;
-  border-bottom: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
 }
 
 @media (min-width: 768px) {
   .story-img-wrapper {
     height: 100%;
     border-bottom: none;
-    border-right: 3px solid #000000;
+    border-right: var(--border-width) solid var(--color-border);
   }
 }
 
@@ -315,12 +324,12 @@ const submitStory = async () => {
   left: 1rem;
   background-color: #FFF176;
   color: #1A1A1A;
-  border: 2px solid #000000;
-  border-radius: 8px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 800;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: var(--shadow-neo-active);
 }
 
 .story-content {
@@ -334,14 +343,18 @@ const submitStory = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark, #1A1A1A);
   margin-bottom: 0.5rem;
+}
+
+[data-theme='dark'] .story-title-item {
+  color: var(--color-text-dark);
 }
 
 .story-author {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin-bottom: 1rem;
 }
 
@@ -349,8 +362,8 @@ const submitStory = async () => {
   display: inline-flex;
   align-items: center;
   background-color: #1a1a1a;
-  border: 2px solid #000000;
-  border-radius: 8px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 0.5rem 1rem;
   font-size: 0.85rem;
   font-weight: 700;
@@ -363,6 +376,10 @@ const submitStory = async () => {
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.6;
+  color: var(--color-text, #333333);
+}
+
+[data-theme='dark'] .story-text {
   color: #dddddd;
 }
 
@@ -444,7 +461,7 @@ const submitStory = async () => {
 }
 
 .form-group .neo-input {
-  background-color: #FFFFFF;
+  background-color: var(--color-text-dark);
   color: #1A1A1A;
 }
 

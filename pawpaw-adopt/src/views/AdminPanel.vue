@@ -9,15 +9,6 @@
 
     <!-- Grid Menu Utama Admin -->
     <div class="admin-grid">
-      
-      <!-- Card 1: Verifikasi Laporan -->
-      <div @click="activeTab = 'reports'" class="admin-card" :class="{ 'active-card': activeTab === 'reports' }">
-        <div class="icon-box bg-orange">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-        </div>
-        <h3>{{ langStore.t('verifyReports') }}</h3>
-        <p>Kelola laporan masuk</p>
-      </div>
 
       <!-- Card 2: Manajemen User -->
       <div @click="activeTab = 'users'" class="admin-card" :class="{ 'active-card': activeTab === 'users' }">
@@ -53,53 +44,6 @@
         </div>
         <h3>System Tools</h3>
         <p>Database Seeder</p>
-      </div>
-
-      <!-- Card 6: Export Rekapitulasi -->
-      <div @click="exportData" class="admin-card">
-        <div class="icon-box bg-red">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        </div>
-        <h3>{{ langStore.t('exportSummary') }}</h3>
-        <p>Download data PDF</p>
-      </div>
-
-    </div>
-
-    <!-- Kontainer Tabel Laporan Tertunda -->
-    <div v-if="activeTab === 'reports'" class="table-container">
-      <h3 class="section-title">{{ langStore.t('manageReports') }}</h3>
-      <div v-if="loading" class="loading-state">
-        <SkeletonLoader v-for="i in 3" :key="i" height="60px" class="mb-2" />
-      </div>
-      <div v-else-if="pendingReports.length === 0" class="empty-module">
-        {{ langStore.t('noPendingReports') }}
-      </div>
-      
-      <div v-else class="table-scroll">
-        <table class="neo-table">
-          <thead>
-            <tr>
-              <th>{{ langStore.t('idReport') }}</th>
-              <th>{{ langStore.t('type') }}</th>
-              <th>{{ langStore.t('color') }}</th>
-              <th>{{ langStore.t('status') }}</th>
-              <th class="text-center">{{ langStore.t('action') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="rep in pendingReports" :key="rep.id">
-              <td class="font-bold">#{{ rep.id.substring(0,8).toUpperCase() }}</td>
-              <td class="text-gray">{{ rep.type }} Ditemukan</td>
-              <td>{{ rep.color }}</td>
-              <td><span class="badge">{{ rep.status }}</span></td>
-              <td class="action-cell">
-                <button class="btn-approve" @click="approveReport(rep.id)">{{ langStore.t('approve') }}</button>
-                <button class="btn-delete" @click="deleteReport(rep.id)">{{ langStore.t('delete') }}</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
@@ -138,7 +82,7 @@
     <!-- Kontainer Verifikasi Shelter -->
     <div v-if="activeTab === 'adopt_shelters'" class="table-container">
       <h3 class="section-title">Kelola Verifikasi Shelter</h3>
-      <div v-if="loadingShelters" class="loading-state">
+      <div v-if="loadingadopt_shelters" class="loading-state">
         <SkeletonLoader v-for="i in 3" :key="i" height="40px" class="mb-2" />
       </div>
       <div v-else-if="shelterList.length === 0" class="empty-module">
@@ -226,10 +170,40 @@
       <p class="text-gray mt-4 mb-6">Menu khusus administrator untuk melakukan populating data dummy dalam database secara instan untuk kebutuhan simulasi aplikasi.</p>
       
       <div class="seeder-grid">
+        <div class="seeder-card">
+          <h4>Seed Users</h4>
+          <p>Tanam 50 Adopter, 10 Shelter, dan 3 Admin Demo.</p>
+          <button class="btn-seeder" @click="runSeed('users')">Seed Users</button>
+        </div>
+
+        <div class="seeder-card">
+          <h4>Seed Adoption Pets</h4>
+          <p>Tanam 100 hewan adopsi (50 kucing, 30 anjing, 10 kelinci, 5 burung, 5 hamster).</p>
+          <button class="btn-seeder" @click="runSeed('pets')">Seed Pets</button>
+        </div>
+
+        <div class="seeder-card">
+          <h4>Seed Adoption Requests</h4>
+          <p>Tanam 200 pengajuan adopsi acak dengan status bervariasi.</p>
+          <button class="btn-seeder" @click="runSeed('requests')">Seed Requests</button>
+        </div>
+
+        <div class="seeder-card">
+          <h4>Seed Adopt Stories</h4>
+          <p>Tanam 20 kisah adopsi sukses terverifikasi.</p>
+          <button class="btn-seeder" @click="runSeed('stories')">Seed Adopt Stories</button>
+        </div>
+
+        <div class="seeder-card">
+          <h4>Seed Adopt Notifications</h4>
+          <p>Tanam 100 notifikasi pemberitahuan sistem (Adopsi).</p>
+          <button class="btn-seeder" @click="runSeed('notifications')">Seed Adopt Notifs</button>
+        </div>
+
         <div class="seeder-card card-full">
-          <h4>Seed Finder Data & Users</h4>
-          <p>Tambahkan 3 Admin, 1 User, dan contoh laporan Lost & Found Pets.</p>
-          <button class="btn-seeder btn-seeder-all" @click="runSeed('all')">Seed Finder Data</button>
+          <h4>Seed All System Data</h4>
+          <p>Tanam seluruh data di atas secara berurutan dalam satu kali klik.</p>
+          <button class="btn-seeder btn-seeder-all" @click="runSeed('all')">Seed All Data</button>
         </div>
       </div>
     </div>
@@ -241,13 +215,17 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { getPetFallbackImage } from '../utils/helpers';
 import { useLangStore } from '../stores/lang';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
-import { getPetFallbackImage } from '../utils/helpers';
 import { 
+  seedUsers, 
+  seedAdoptionPets, 
+  seedAdoptionRequests, 
+  seedSuccessStories, 
+  seedNotifications, 
   forceSeedDatabase,
-  clearAllData, 
-  seedAllData 
+  clearAllData 
 } from '../utils/seeder';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -255,18 +233,17 @@ import jsPDF from 'jspdf';
 
 const router = useRouter();
 const langStore = useLangStore();
-const activeTab = ref('reports');
-const pendingReports = ref([]);
+const activeTab = ref('users');
 const userList = ref([]);
 const shelterList = ref([]);
 const petList = ref([]);
 const loading = ref(false);
 const loadingUsers = ref(false);
-const loadingShelters = ref(false);
+const loadingadopt_shelters = ref(false);
 const loadingPets = ref(false);
 
 onMounted(() => {
-  fetchPendingReports();
+  fetchUsers();
 });
 
 watch(activeTab, (newTab) => {
@@ -274,52 +251,17 @@ watch(activeTab, (newTab) => {
     fetchUsers();
   }
   if (newTab === 'adopt_shelters') {
-    fetchShelters();
+    fetchadopt_shelters();
   }
   if (newTab === 'pets') {
     fetchPets();
   }
 });
 
-const fetchPendingReports = async () => {
-  loading.value = true;
-  try {
-    const q = query(collection(db, 'finder_found_pets'), where('status', '==', 'Pending Match'));
-    const snap = await getDocs(q);
-    pendingReports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch (err) {
-    console.error(err);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const approveReport = async (id) => {
-  if(confirm('Setujui laporan ini agar tampil publik secara resmi?')) {
-    try {
-      await updateDoc(doc(db, 'finder_found_pets', id), { status: 'Verified' });
-      pendingReports.value = pendingReports.value.filter(r => r.id !== id);
-    } catch (err) {
-      alert('Gagal menyetujui: ' + err.message);
-    }
-  }
-};
-
-const deleteReport = async (id) => {
-  if(confirm('Anda yakin ingin menghapus laporan spam/palsu ini?')) {
-    try {
-      await deleteDoc(doc(db, 'finder_found_pets', id));
-      pendingReports.value = pendingReports.value.filter(r => r.id !== id);
-    } catch (err) {
-      alert('Gagal menghapus: ' + err.message);
-    }
-  }
-};
-
 const fetchUsers = async () => {
   loadingUsers.value = true;
   try {
-    const snap = await getDocs(collection(db, 'finder_users'));
+    const snap = await getDocs(collection(db, 'adopt_users'));
     userList.value = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
   } catch (err) {
     console.error(err);
@@ -331,7 +273,7 @@ const fetchUsers = async () => {
 const deleteUser = async (uid) => {
   if(confirm('Anda yakin ingin menghapus user ini selamanya?')) {
     try {
-      await deleteDoc(doc(db, 'finder_users', uid));
+      await deleteDoc(doc(db, 'adopt_users', uid));
       userList.value = userList.value.filter(u => u.uid !== uid);
     } catch (err) {
       alert('Gagal menghapus: ' + err.message);
@@ -340,15 +282,15 @@ const deleteUser = async (uid) => {
 };
 
 // Shelter operations
-const fetchShelters = async () => {
-  loadingShelters.value = true;
+const fetchadopt_shelters = async () => {
+  loadingadopt_shelters.value = true;
   try {
     const snap = await getDocs(collection(db, 'adopt_shelters'));
     shelterList.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.error(err);
   } finally {
-    loadingShelters.value = false;
+    loadingadopt_shelters.value = false;
   }
 };
 
@@ -360,7 +302,7 @@ const verifyShelter = async (id, newStatus) => {
       if (shelter) {
         shelter.status = newStatus;
         if (shelter.userId && newStatus === 'Verified') {
-          await updateDoc(doc(db, 'finder_users', shelter.userId), { role: 'shelter' });
+          await updateDoc(doc(db, 'adopt_users', shelter.userId), { role: 'shelter' });
         }
       }
       alert(`Shelter berhasil di-update menjadi ${newStatus}!`);
@@ -414,8 +356,8 @@ const runClearData = async () => {
       const res = await clearAllData();
       alert(res.message);
       fetchUsers();
-      fetchLostPets();
-      fetchFoundPets();
+      fetchadopt_shelters();
+      fetchPets();
     } catch (err) {
       alert('Gagal menghapus data: ' + err.message);
     }
@@ -433,8 +375,13 @@ const runSeed = async (type) => {
   if (confirmed) {
     try {
       let res;
-      if (type === 'all') res = await seedAllData();
-      
+      if (type === 'users') res = await seedUsers(true);
+      else if (type === 'pets') res = await seedAdoptionPets(true);
+      else if (type === 'requests') res = await seedAdoptionRequests(true);
+      else if (type === 'stories') res = await seedSuccessStories(true);
+      else if (type === 'notifications') res = await seedNotifications(true);
+      else if (type === 'all') res = await forceSeedDatabase();
+
       if (res && res.success) {
         alert(res.message);
       } else {
@@ -446,128 +393,7 @@ const runSeed = async (type) => {
   }
 };
 
-const exportData = async () => {
-  try {
-    const lostSnap = await getDocs(collection(db, 'finder_lost_pets'));
-    const foundSnap = await getDocs(collection(db, 'finder_found_pets'));
-    
-    const docPdf = new jsPDF();
-    
-    docPdf.setFillColor(18, 18, 18);
-    docPdf.rect(0, 0, 210, 297, 'F');
-    
-    docPdf.setTextColor(255, 255, 255);
-    docPdf.setFont("helvetica", "bold");
-    docPdf.setFontSize(18);
-    docPdf.text("LAPORAN REKAPITULASI DATA PAWPAW FINDER", 15, 20);
-    
-    docPdf.setTextColor(170, 170, 170);
-    docPdf.setFont("helvetica", "normal");
-    docPdf.setFontSize(10);
-    docPdf.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 15, 27);
-    
-    docPdf.setDrawColor(0, 0, 0);
-    docPdf.setFillColor(38, 38, 38);
-    docPdf.rect(15, 32, 180, 25, 'F');
-    docPdf.rect(15, 32, 180, 25, 'D');
-    
-    docPdf.setTextColor(255, 255, 255);
-    docPdf.setFont("helvetica", "bold");
-    docPdf.text("Ringkasan Laporan:", 20, 39);
-    docPdf.setFont("helvetica", "normal");
-    docPdf.text(`- Total Hewan Hilang (Lost Pets): ${lostSnap.size}`, 20, 46);
-    docPdf.text(`- Total Hewan Ditemukan (Found Pets): ${foundSnap.size}`, 20, 52);
-    
-    let yOffset = 70;
-    
-    docPdf.setFont("helvetica", "bold");
-    docPdf.setFontSize(12);
-    docPdf.text("Daftar Hewan Hilang (Lost Pets)", 15, yOffset);
-    yOffset += 7;
-    
-    docPdf.setFillColor(179, 157, 219);
-    docPdf.rect(15, yOffset, 180, 8, 'F');
-    docPdf.rect(15, yOffset, 180, 8, 'D');
-    docPdf.setTextColor(26, 26, 26);
-    docPdf.setFontSize(9);
-    docPdf.text("Nama", 20, yOffset + 5.5);
-    docPdf.text("Jenis/Warna", 60, yOffset + 5.5);
-    docPdf.text("Lokasi Terakhir", 110, yOffset + 5.5);
-    docPdf.text("Status", 165, yOffset + 5.5);
-    yOffset += 8;
-
-    docPdf.setFont("helvetica", "normal");
-    docPdf.setTextColor(255, 255, 255);
-    lostSnap.forEach(d => {
-      const p = d.data();
-      if (yOffset > 270) { 
-        docPdf.addPage(); 
-        docPdf.setFillColor(18, 18, 18);
-        docPdf.rect(0, 0, 210, 297, 'F');
-        yOffset = 20; 
-      }
-      docPdf.setFillColor(38, 38, 38);
-      docPdf.rect(15, yOffset, 180, 8, 'F');
-      docPdf.rect(15, yOffset, 180, 8, 'D');
-      docPdf.text(p.name || 'N/A', 20, yOffset + 5.5);
-      docPdf.text(`${p.type || ''} / ${p.color || ''}`, 60, yOffset + 5.5);
-      const loc = (p.lastLocation || '').substring(0, 30);
-      docPdf.text(loc, 110, yOffset + 5.5);
-      docPdf.text(p.status || 'N/A', 165, yOffset + 5.5);
-      yOffset += 8;
-    });
-
-    yOffset += 10;
-    if (yOffset > 250) { 
-      docPdf.addPage(); 
-      docPdf.setFillColor(18, 18, 18);
-      docPdf.rect(0, 0, 210, 297, 'F');
-      yOffset = 20; 
-    }
-
-    docPdf.setTextColor(255, 255, 255);
-    docPdf.setFont("helvetica", "bold");
-    docPdf.setFontSize(12);
-    docPdf.text("Daftar Hewan Ditemukan (Found Pets)", 15, yOffset);
-    yOffset += 7;
-
-    docPdf.setFillColor(74, 222, 128);
-    docPdf.rect(15, yOffset, 180, 8, 'F');
-    docPdf.rect(15, yOffset, 180, 8, 'D');
-    docPdf.setTextColor(26, 26, 26);
-    docPdf.setFontSize(9);
-    docPdf.text("Jenis", 20, yOffset + 5.5);
-    docPdf.text("Warna", 60, yOffset + 5.5);
-    docPdf.text("Lokasi Temuan", 100, yOffset + 5.5);
-    docPdf.text("Status", 165, yOffset + 5.5);
-    yOffset += 8;
-
-    docPdf.setFont("helvetica", "normal");
-    docPdf.setTextColor(255, 255, 255);
-    foundSnap.forEach(d => {
-      const p = d.data();
-      if (yOffset > 270) { 
-        docPdf.addPage(); 
-        docPdf.setFillColor(18, 18, 18);
-        docPdf.rect(0, 0, 210, 297, 'F');
-        yOffset = 20; 
-      }
-      docPdf.setFillColor(38, 38, 38);
-      docPdf.rect(15, yOffset, 180, 8, 'F');
-      docPdf.rect(15, yOffset, 180, 8, 'D');
-      docPdf.text(p.type || 'N/A', 20, yOffset + 5.5);
-      docPdf.text(p.color || 'N/A', 60, yOffset + 5.5);
-      const loc = (p.foundLocation || '').substring(0, 35);
-      docPdf.text(loc, 100, yOffset + 5.5);
-      docPdf.text(p.status || 'N/A', 165, yOffset + 5.5);
-      yOffset += 8;
-    });
-
-    docPdf.save("Rekapitulasi_Pawpaw_Finder.pdf");
-  } catch (err) {
-    alert("Gagal export data: " + err.message);
-  }
-};
+// END of AdminPanel logic
 </script>
 
 <style scoped>
@@ -598,15 +424,15 @@ const exportData = async () => {
   color: #1A1A1A;
   font-weight: 800;
   border: var(--border-width) solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-kembali:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: var(--shadow-neo);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .admin-grid {
@@ -619,7 +445,7 @@ const exportData = async () => {
 .admin-card {
   background-color: var(--color-card-bg);
   border: var(--border-width) solid var(--color-border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   box-shadow: var(--shadow-neo);
   cursor: pointer;
@@ -629,7 +455,7 @@ const exportData = async () => {
 
 .admin-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-neo);
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .admin-card.active-card {
@@ -645,7 +471,7 @@ const exportData = async () => {
   width: 48px;
   height: 48px;
   border: var(--border-width) solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -691,7 +517,7 @@ const exportData = async () => {
 .table-scroll {
   overflow-x: auto;
   border: var(--border-width) solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 .neo-table {
@@ -751,11 +577,11 @@ const exportData = async () => {
 .btn-approve, .btn-delete, .btn-seeder {
   padding: 0.5rem 0.75rem;
   border: var(--border-width) solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-weight: 800;
   font-size: 0.75rem;
   cursor: pointer;
-  box-shadow: var(--shadow-neo);
+  box-shadow: var(--shadow-neo-active);
   transition: all 0.2s;
 }
 
@@ -763,15 +589,15 @@ const exportData = async () => {
 .btn-delete { background-color: #FF6B6B; color: white; }
 
 .btn-approve:active, .btn-delete:active, .btn-seeder:active {
-  transform: translate(2px, 2px);
+  transform: translateY(1px);
   box-shadow: none;
 }
 
 .empty-module {
   text-align: center;
   padding: 3rem;
-  border: 3px dashed #000000;
-  border-radius: 16px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
   background-color: #1a1a1a;
   font-weight: 700;
   color: #aaaaaa;
@@ -787,7 +613,7 @@ const exportData = async () => {
 .seeder-card {
   background-color: #1a1a1a;
   border: var(--border-width) solid var(--color-border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
