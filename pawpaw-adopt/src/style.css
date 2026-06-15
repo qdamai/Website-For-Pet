@@ -205,3 +205,40 @@ input:-webkit-autofill:active{
   width: 100%;
   border-radius: var(--radius-md);
 }
+
+/* Neo-Brutalist Buttons */
+.btn-neo {
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-weight: 800;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-text-dark);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-neo);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  outline: none;
+}
+
+.btn-neo:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-neo-hover);
+}
+
+.btn-neo:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-neo-active);
+}
+
+.btn-neo:disabled {
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}

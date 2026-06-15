@@ -722,17 +722,12 @@ const startChat = async () => {
 }
 
 .btn-secondary {
-  background-color: #1a1a1a;
+  background-color: var(--color-card-bg);
   color: var(--color-text-dark);
   border-color: var(--color-border);
   padding: 0.75rem 0.5rem;
   font-size: 0.85rem;
   text-align: center;
-}
-
-.btn-wishlist {
-  background-color: #262626;
-  color: #aaaaaa;
 }
 
 .btn-wishlist.wishlisted {
