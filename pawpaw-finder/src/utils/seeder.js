@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, setDoc, query, limit, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, query, limit, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 // Helper to generate a random item from array
@@ -177,7 +177,63 @@ export const seedUsers = async () => {
   return { success: true, message: "Berhasil menanam data dummy" };
 };
 
-// 2. Seed Adoption Pets (100 pets: 50 cats, 30 dogs, 10 rabbits, 5 birds, 5 hamsters)
+// Helper to dynamically generate varied, realistic descriptions
+const generateDescription = (name, species, breed) => {
+  const intro = [
+    `Temui ${name}, seekor ${species} ras ${breed} yang luar biasa menggemaskan.`,
+    `Perkenalkan ${name}, ${species} ras ${breed} yang siap mengisi hari-hari Anda dengan keceriaan.`,
+    `Ini adalah ${name}, seekor ${species} ras ${breed} yang sedang mencari rumah baru penuh kasih sayang.`,
+    `Halo! Saya ${name}, seekor ${species} ras ${breed} yang ramah dan lucu.`
+  ];
+
+  const character = {
+    Cat: [
+      `Ia memiliki bulu yang sangat lembut dan bersih. Kebiasaannya adalah mendengkur halus saat kepalanya dielus.`,
+      `Sangat suka diajak bermain bola bulu atau mengejar mainan laser. Gerakannya lincah dan penuh rasa ingin tahu.`,
+      `Ia adalah anabul tipe penyendiri namun sangat manja ketika menginginkan perhatian. Suka tidur siang di tempat hangat.`,
+      `Karakternya sangat ramah dan sudah terbiasa bersosialisasi dengan kucing lain serta manusia.`
+    ],
+    Dog: [
+      `Ia sangat pintar dan sudah memahami perintah dasar seperti duduk, diam, dan bersalaman.`,
+      `Suka sekali diajak jalan-jalan sore dan sangat bersemangat bermain lempar tangkap bola di halaman.`,
+      `Karakternya setia, protektif, namun sangat lembut terhadap anak-anak maupun orang baru.`,
+      `Ia memiliki tingkat energi yang cukup tinggi dan sangat senang jika memiliki ruang untuk berlari.`
+    ],
+    Rabbit: [
+      `Sangat menggemaskan dengan telinga panjangnya dan gemar menggerak-gerakkan hidung kecilnya saat makan.`,
+      `Kelinci yang tenang dan suka sekali memakan potongan wortel atau sayuran segar langsung dari tangan.`,
+      `Suka melompat-lompat kecil di area berumput dan sangat bersahabat dengan pemiliknya.`,
+      `Bulu halusnya membutuhkan perawatan ringan secara berkala agar tetap bersih dan sehat.`
+    ],
+    Bird: [
+      `Kicauannya sangat merdu, terutama di pagi hari, membuat suasana rumah menjadi sangat asri.`,
+      `Burung yang cerdas dan suka berinteraksi. Sangat senang bertengger di bahu atau jari pemiliknya.`,
+      `Bulunya berwarna indah, bersih, dan sangat aktif bergerak di dalam sangkarnya.`,
+      `Sangat menyukai buah-buahan segar dan pakan bijian berkualitas tinggi.`
+    ],
+    Hamster: [
+      `Ukurannya sangat mungil dan lincah. Paling senang berlari di roda putar sepanjang malam.`,
+      `Lucu sekali saat sedang makan biji bunga matahari dan menimbunnya di dalam kantung pipi.`,
+      `Karakternya jinak, tidak menggigit, dan sangat menyenangkan untuk diperhatikan tingkah lakunya.`,
+      `Sangat aktif membuat sarang sendiri dari serutan kayu bersih di dalam kandangnya.`
+    ]
+  };
+
+  const statusInfo = [
+    `Kondisi kesehatannya sangat baik dan nafsu makannya teratur. Ia sudah divaksinasi dan siap diadopsi sekarang juga.`,
+    `Hewan ini terawat dengan sangat baik di shelter kami, memiliki catatan medis yang bersih, dan sangat menantikan kehadiran keluarga baru.`,
+    `Ia terbiasa makan teratur, aktif, dan bersih. Datanglah ke shelter untuk berkenalan langsung dengannya!`,
+    `Sangat mandiri namun membutuhkan pemilik yang bertanggung jawab untuk merawatnya dengan penuh cinta.`
+  ];
+
+  const selectedIntro = randomChoice(intro);
+  const selectedChar = randomChoice(character[species] || character['Cat']);
+  const selectedStatus = randomChoice(statusInfo);
+
+  return `${selectedIntro} ${selectedChar} ${selectedStatus}`;
+};
+
+// 2. Seed Adoption Pets (20 pets: 8 cats, 5 dogs, 3 rabbits, 2 birds, 2 hamsters)
 export const seedAdoptionPets = async () => {
   const ref = collection(db, 'adoption_pets');
   const snap = await getDocs(query(ref, limit(5)));
@@ -198,16 +254,19 @@ export const seedAdoptionPets = async () => {
         photos.push(photoList[(i + p) % photoList.length]);
       }
 
+      const name = randomChoice(petNames);
+      const breed = randomChoice(breedList);
+
       data.push({
         id,
-        name: `${randomChoice(petNames)}`,
+        name,
         species,
-        breed: randomChoice(breedList),
+        breed,
         age: Math.floor(Math.random() * 6) + 1, // 1 to 6 years
         weight: parseFloat((Math.random() * (12 - 1) + 1).toFixed(1)), // 1 to 12 kg
         gender: Math.random() > 0.5 ? 'Male' : 'Female',
         color: randomChoice(colors),
-        description: `${species} ras ${randomChoice(breedList)} yang sangat lucu, manja, ramah dengan manusia, mencari rumah baru yang penuh kasih sayang.`,
+        description: generateDescription(name, species, breed),
         healthStatus: randomChoice(['Sangat Sehat', 'Sehat', 'Sedang Pemulihan']),
         vaccinated: Math.random() > 0.3,
         sterilized: Math.random() > 0.4,
@@ -238,11 +297,11 @@ export const seedAdoptionPets = async () => {
     return data;
   };
 
-  const cats = createPetData('Cat', catBreeds, catPhotos, 50);
-  const dogs = createPetData('Dog', dogBreeds, dogPhotos, 30);
-  const rabbits = createPetData('Rabbit', rabbitBreeds, rabbitPhotos, 10);
-  const birds = createPetData('Bird', birdBreeds, birdPhotos, 5);
-  const hamsters = createPetData('Hamster', hamsterBreeds, hamsterPhotos, 5);
+  const cats = createPetData('Cat', catBreeds, catPhotos, 8);
+  const dogs = createPetData('Dog', dogBreeds, dogPhotos, 5);
+  const rabbits = createPetData('Rabbit', rabbitBreeds, rabbitPhotos, 3);
+  const birds = createPetData('Bird', birdBreeds, birdPhotos, 2);
+  const hamsters = createPetData('Hamster', hamsterBreeds, hamsterPhotos, 2);
 
   const allPets = [...cats, ...dogs, ...rabbits, ...birds, ...hamsters];
 
@@ -265,7 +324,7 @@ export const seedAdoptionPets = async () => {
   return { success: true, message: "Berhasil menanam data dummy" };
 };
 
-// 3. Seed Adoption Requests (200 requests)
+// 3. Seed Adoption Requests (40 requests)
 export const seedAdoptionRequests = async () => {
   const ref = collection(db, 'adoption_requests');
   const snap = await getDocs(query(ref, limit(5)));
@@ -284,9 +343,9 @@ export const seedAdoptionRequests = async () => {
     'Adopted'
   ];
 
-  for (let i = 1; i <= 200; i++) {
+  for (let i = 1; i <= 40; i++) {
     const reqId = `req_adopt_${i}`;
-    const petNum = Math.floor(Math.random() * 100) + 1;
+    const petNum = Math.floor(Math.random() * 20) + 1;
     const adopterNum = Math.floor(Math.random() * 50) + 1;
     const status = randomChoice(statuses);
 
@@ -600,3 +659,43 @@ export const seedDatabase = async () => {
     console.error('Error during auto-seeding:', error);
   }
 };
+
+export const resetAndSeedAllData = async () => {
+  try {
+    const collectionsToClear = [
+      'adoption_pets',
+      'adoption_requests',
+      'notifications',
+      'success_stories',
+      'appointments',
+      'health_records',
+      'shelters'
+    ];
+
+    for (const colName of collectionsToClear) {
+      const qSnap = await getDocs(collection(db, colName));
+      const promises = qSnap.docs.map(d => deleteDoc(d.ref));
+      await Promise.all(promises);
+    }
+
+    // Clear only seeded users (so custom tester accounts aren't deleted)
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const userPromises = usersSnap.docs
+      .filter(d => d.id.startsWith('shelter_') || d.id.startsWith('adopter_') || d.id.startsWith('admin') || d.id === 'user1')
+      .map(d => deleteDoc(d.ref));
+    await Promise.all(userPromises);
+
+    // Seed clean datasets
+    await seedUsers();
+    await seedAdoptionPets();
+    await seedAdoptionRequests();
+    await seedSuccessStories();
+    await seedNotifications();
+
+    return { success: true, message: "Berhasil membersihkan dan menanam ulang data dummy." };
+  } catch (err) {
+    console.error("Error during reset and seed:", err);
+    return { success: false, message: "Gagal reset dan seed: " + err.message };
+  }
+};
+

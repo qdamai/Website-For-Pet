@@ -216,43 +216,15 @@
     <!-- Kontainer System Tools: Database Seeder -->
     <div v-if="activeTab === 'seeder'" class="table-container">
       <h3 class="section-title">System Tools: Database Seeder</h3>
-      <p class="text-gray mb-6">Menu khusus administrator untuk melakukan populating data dummy dalam database secara instan untuk kebutuhan simulasi aplikasi.</p>
+      <p class="text-gray mb-6">Menu khusus administrator untuk mengatur data simulasi sistem Pawpaw Finder secara instan.</p>
       
-      <div class="seeder-grid">
-        <div class="seeder-card">
-          <h4>Seed Users</h4>
-          <p>Tanam 50 Adopter, 10 Shelter, dan 3 Admin Demo.</p>
-          <button class="btn-seeder" @click="runSeed('users')">Seed Users</button>
-        </div>
-
-        <div class="seeder-card">
-          <h4>Seed Adoption Pets</h4>
-          <p>Tanam 100 hewan adopsi (50 kucing, 30 anjing, 10 kelinci, 5 burung, 5 hamster).</p>
-          <button class="btn-seeder" @click="runSeed('pets')">Seed Pets</button>
-        </div>
-
-        <div class="seeder-card">
-          <h4>Seed Adoption Requests</h4>
-          <p>Tanam 200 pengajuan adopsi acak dengan status bervariasi.</p>
-          <button class="btn-seeder" @click="runSeed('requests')">Seed Requests</button>
-        </div>
-
-        <div class="seeder-card">
-          <h4>Seed Success Stories</h4>
-          <p>Tanam 20 kisah adopsi sukses terverifikasi.</p>
-          <button class="btn-seeder" @click="runSeed('stories')">Seed Stories</button>
-        </div>
-
-        <div class="seeder-card">
-          <h4>Seed Notifications</h4>
-          <p>Tanam 100 notifikasi pemberitahuan sistem.</p>
-          <button class="btn-seeder" @click="runSeed('notifications')">Seed Notifications</button>
-        </div>
-
+      <div class="seeder-single-container">
         <div class="seeder-card card-full">
-          <h4>Seed All System Data</h4>
-          <p>Tanam seluruh data di atas secara berurutan dalam satu kali klik.</p>
-          <button class="btn-seeder btn-seeder-all" @click="runSeed('all')">Seed All Data</button>
+          <h4>Reset &amp; Seed Database</h4>
+          <p class="mb-4">Membersihkan seluruh data lama (hewan adopsi, request, notifikasi, janji temu, dll) dan menanam ulang 20 data anabul baru secara otomatis dengan deskripsi dinamis dan unik.</p>
+          <button class="btn-seeder btn-seeder-all" @click="runResetAndSeed" :disabled="loadingSeed">
+            {{ loadingSeed ? '⏳ Memproses...' : '🔄 Hapus &amp; Seed Data Baru' }}
+          </button>
         </div>
       </div>
     </div>
@@ -266,13 +238,7 @@ import { useRouter } from 'vue-router';
 import { getPetFallbackImage } from '../utils/helpers';
 import { useLangStore } from '../stores/lang';
 import { 
-  forceSeedDatabase, 
-  seedUsers, 
-  seedAdoptionPets, 
-  seedAdoptionRequests, 
-  seedSuccessStories, 
-  seedNotifications, 
-  seedAllData 
+  resetAndSeedAllData 
 } from '../utils/seeder';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -289,6 +255,7 @@ const loading = ref(false);
 const loadingUsers = ref(false);
 const loadingShelters = ref(false);
 const loadingPets = ref(false);
+const loadingSeed = ref(false);
 
 onMounted(() => {
   fetchPendingReports();
@@ -432,31 +399,21 @@ const moderatePet = async (id, action) => {
 };
 
 // Seeder logic
-const runSeed = async (type) => {
-  let confirmed = false;
-  if (type === 'all') {
-    confirmed = confirm("Anda yakin ingin menanam seluruh data dummy? Proses ini membutuhkan waktu beberapa detik.");
-  } else {
-    confirmed = confirm(`Jalankan seeder untuk kategori [${type}]?`);
-  }
-
+const runResetAndSeed = async () => {
+  const confirmed = confirm("Anda yakin ingin menghapus seluruh data lama dan menanam ulang data dummy baru? Proses ini membutuhkan waktu beberapa detik.");
   if (confirmed) {
+    loadingSeed.value = true;
     try {
-      let res;
-      if (type === 'users') res = await seedUsers();
-      else if (type === 'pets') res = await seedAdoptionPets();
-      else if (type === 'requests') res = await seedAdoptionRequests();
-      else if (type === 'stories') res = await seedSuccessStories();
-      else if (type === 'notifications') res = await seedNotifications();
-      else if (type === 'all') res = await seedAllData();
-
+      const res = await resetAndSeedAllData();
       if (res.success) {
-        alert("Berhasil menanam data dummy");
+        alert("Berhasil membersihkan database dan menanam ulang 20 data dummy baru!");
       } else {
-        alert(res.message); // Displays "Data sudah tersedia"
+        alert(res.message);
       }
     } catch (err) {
-      alert("Gagal menanam data: " + err.message);
+      alert("Gagal melakukan reset dan seed: " + err.message);
+    } finally {
+      loadingSeed.value = false;
     }
   }
 };

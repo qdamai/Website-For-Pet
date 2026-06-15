@@ -2,9 +2,13 @@
   <div class="detail-container">
     <div class="back-nav">
       <button @click="router.back()" class="btn-neo btn-back">
-        &larr; Kembali
+        &larr; Kembali ke Katalog
       </button>
     </div>
+
+    <!-- Toast Notif & Confirm Modal -->
+    <ToastNotif ref="toast" />
+    <ConfirmModal ref="confirmModal" />
 
     <div v-if="loading" class="loading-wrapper">
       <SkeletonLoader height="450px" />
@@ -136,15 +140,28 @@
 
         <!-- Action Panel -->
         <div class="action-panel">
+          <!-- Main Adopt Button -->
           <button 
             @click="goToAdoptForm" 
-            :disabled="pet.status !== 'Available'"
+            :disabled="pet.status !== 'Available' || adoptLoading"
             class="btn-neo btn-adopt-main"
+            :class="{ 'btn-adopted': pet.status === 'Adopted', 'btn-reserved': pet.status === 'Reserved' }"
           >
-            {{ pet.status === 'Available' ? 'Ajukan Adopsi Sekarang' : pet.status === 'Reserved' ? 'Hewan Dipesan' : 'Sudah Diadopsi' }}
+            <span v-if="adoptLoading">⏳ Memuat...</span>
+            <span v-else-if="pet.status === 'Available'">🐾 Ajukan Adopsi Sekarang</span>
+            <span v-else-if="pet.status === 'Reserved'">🔒 Hewan Sedang Dipesan</span>
+            <span v-else>✅ Sudah Diadopsi</span>
           </button>
-          
+
+          <!-- Wishlist + Secondary Actions -->
           <div class="secondary-actions">
+            <button 
+              @click="handleToggleWishlist" 
+              class="btn-neo btn-secondary btn-wishlist"
+              :class="{ 'wishlisted': isWishlisted }"
+            >
+              {{ isWishlisted ? '💖 Disimpan' : '🤍 Simpan' }}
+            </button>
             <button @click="showVisitModal = true" class="btn-neo btn-secondary">
               📅 Kunjungan
             </button>
@@ -190,25 +207,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuthStore } from '../stores/auth';
+import { useWishlistStore } from '../stores/wishlist';
 import SkeletonLoader from '../components/SkeletonLoader.vue';
 import EmptyState from '../components/EmptyState.vue';
+import ToastNotif from '../components/ToastNotif.vue';
+import ConfirmModal from '../components/ConfirmModal.vue';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const wishlistStore = useWishlistStore();
 
 const pet = ref(null);
 const loading = ref(true);
+const adoptLoading = ref(false);
 const activePhoto = ref('');
 const submitting = ref(false);
 const showVisitModal = ref(false);
+const toast = ref(null);
+const confirmModal = ref(null);
 
 const id = route.params.id;
+
+const isWishlisted = computed(() => wishlistStore.wishlistedIds.includes(id));
 
 const visitForm = ref({
   date: '',
@@ -218,6 +244,9 @@ const visitForm = ref({
 
 onMounted(async () => {
   await fetchPetDetail();
+  if (authStore.isAuthenticated) {
+    await wishlistStore.fetchWishlist(authStore.user.uid);
+  }
 });
 
 const fetchPetDetail = async () => {
@@ -240,17 +269,31 @@ const fetchPetDetail = async () => {
 
 const goToAdoptForm = () => {
   if (!authStore.isAuthenticated) {
-    alert("Silakan masuk (login) terlebih dahulu untuk mengajukan adopsi!");
-    router.push({ name: 'Auth' });
+    toast.value?.warning('Login Diperlukan', 'Silakan masuk terlebih dahulu untuk mengajukan adopsi.');
+    setTimeout(() => router.push({ name: 'Auth' }), 1500);
     return;
   }
   router.push(`/adoption/apply/${id}`);
 };
 
+const handleToggleWishlist = async () => {
+  if (!authStore.isAuthenticated) {
+    toast.value?.warning('Login Diperlukan', 'Masuk dulu untuk menyimpan ke wishlist.');
+    setTimeout(() => router.push({ name: 'Auth' }), 1500);
+    return;
+  }
+  await wishlistStore.toggleWishlist(authStore.user.uid, id);
+  if (wishlistStore.wishlistedIds.includes(id)) {
+    toast.value?.success('Ditambahkan ke Wishlist! 💖', `${pet.value?.name} tersimpan di wishlist Anda.`);
+  } else {
+    toast.value?.info('Dihapus dari Wishlist', `${pet.value?.name} dihapus dari wishlist.`);
+  }
+};
+
 const submitAppointment = async () => {
   if (!authStore.isAuthenticated) {
-    alert("Silakan masuk (login) terlebih dahulu!");
-    router.push({ name: 'Auth' });
+    toast.value?.warning('Login Diperlukan', 'Masuk dulu untuk menjadwalkan kunjungan.');
+    setTimeout(() => router.push({ name: 'Auth' }), 1500);
     return;
   }
   submitting.value = true;
@@ -272,11 +315,11 @@ const submitAppointment = async () => {
     };
 
     await setDoc(doc(db, 'appointments', aptId), appointmentDoc);
-    alert("Janji temu kunjungan berhasil dijadwalkan! Menunggu konfirmasi shelter di dashboard.");
+    toast.value?.success('Jadwal Berhasil Dikirim! 📅', 'Kunjungan shelter sedang menunggu konfirmasi. Cek dashboard Anda.');
     showVisitModal.value = false;
     visitForm.value = { date: '', time: '', notes: '' };
   } catch (err) {
-    alert("Gagal membuat janji temu: " + err.message);
+    toast.value?.error('Gagal Membuat Jadwal', err.message);
   } finally {
     submitting.value = false;
   }
@@ -284,12 +327,12 @@ const submitAppointment = async () => {
 
 const startChat = async () => {
   if (!authStore.isAuthenticated) {
-    alert("Silakan masuk (login) terlebih dahulu untuk mengirim pesan.");
-    router.push({ name: 'Auth' });
+    toast.value?.warning('Login Diperlukan', 'Masuk dulu untuk mengirim pesan ke shelter.');
+    setTimeout(() => router.push({ name: 'Auth' }), 1500);
     return;
   }
   if (pet.value.shelterId === authStore.user.uid) {
-    alert("Anda tidak bisa mengechat shelter Anda sendiri.");
+    toast.value?.warning('Tidak Bisa Chat', 'Anda tidak bisa mengechat shelter Anda sendiri.');
     return;
   }
 
@@ -314,7 +357,7 @@ const startChat = async () => {
 
     router.push({ path: '/adoption/dashboard', query: { tab: 'chat', room: convId } });
   } catch (err) {
-    alert("Gagal memulai chat: " + err.message);
+    toast.value?.error('Gagal Memulai Chat', err.message);
   }
 };
 </script>
@@ -644,29 +687,53 @@ const startChat = async () => {
   background-color: #4ADE80;
   color: #1A1A1A;
   padding: 1.25rem;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-adopt-main:disabled {
-  background-color: #262626;
-  color: #555555;
-  border-color: #000000;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
 }
 
+.btn-adopted {
+  background-color: #888888 !important;
+  color: #1A1A1A;
+}
+
+.btn-reserved {
+  background-color: #FFF176 !important;
+  color: #1A1A1A;
+}
+
 .secondary-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
 }
 
 .btn-secondary {
   background-color: #1a1a1a;
   color: #FFFFFF;
   border-color: #000000;
-  padding: 0.75rem;
+  padding: 0.75rem 0.5rem;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.btn-wishlist {
+  background-color: #262626;
+  color: #aaaaaa;
+}
+
+.btn-wishlist.wishlisted {
+  background-color: #FF6B6B;
+  color: #ffffff;
+  border-color: #000;
 }
 
 /* Modal Styling */

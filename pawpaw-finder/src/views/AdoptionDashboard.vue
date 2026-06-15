@@ -633,9 +633,15 @@ const setupRealtimeListeners = () => {
 
   // 2. Notifications listener (only for adopter roles)
   if (!isShelter.value) {
-    const qNotif = query(collection(db, 'notifications'), where('userId', '==', uid), orderBy('createdAt', 'desc'));
+    const qNotif = query(collection(db, 'notifications'), where('userId', '==', uid));
     unsubNotifications = onSnapshot(qNotif, (snapshot) => {
-      userNotifications.value = snapshot.docs.map(d => d.data());
+      const docs = snapshot.docs.map(d => d.data());
+      // Sort in Javascript to avoid composite index requirement
+      userNotifications.value = docs.sort((a, b) => {
+        const timeA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : new Date(a.createdAt || 0).getTime();
+        const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : new Date(b.createdAt || 0).getTime();
+        return timeB - timeA;
+      });
     });
   }
 };
