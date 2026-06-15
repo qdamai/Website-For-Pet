@@ -18,7 +18,7 @@
             <router-link to="/quiz" class="footer-link">Kuis Adopsi</router-link>
             <router-link to="/dashboard" class="footer-link">Adopsi Saya</router-link>
             <router-link to="/profile" class="footer-link">Profil</router-link>
-            <a href="http://localhost:5173" class="footer-link">Pawpaw Finder &rarr;</a>
+            <a href="https://pawpaw-finder.vercel.app" class="footer-link">Pawpaw Finder &rarr;</a>
           </div>
         </div>
       </div>

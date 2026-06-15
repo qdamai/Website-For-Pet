@@ -224,8 +224,7 @@ import {
   seedAdoptionRequests, 
   seedSuccessStories, 
   seedNotifications, 
-  forceSeedDatabase,
-  clearAllData 
+  forceSeedDatabase
 } from '../utils/seeder';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';

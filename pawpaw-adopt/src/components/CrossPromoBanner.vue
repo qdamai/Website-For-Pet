@@ -1,5 +1,5 @@
 <template>
-  <a href="http://localhost:5173" class="cross-promo-banner" target="_blank" rel="noopener noreferrer">
+  <a href="https://pawpaw-finder.vercel.app" class="cross-promo-banner" target="_blank" rel="noopener noreferrer">
     <div class="container banner-content">
       <span class="banner-badge">Pawpaw Finder</span>
       <span class="banner-text">Kehilangan hewan peliharaan? Laporkan dan temukan bantuan di Portal Finder Pawpaw! &rarr;</span>

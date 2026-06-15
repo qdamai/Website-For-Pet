@@ -60,7 +60,7 @@
       </button>
 
       <!-- Adoption CTA Button -->
-      <a href="http://localhost:5173/" class="adoption-cta-button">
+      <a href="https://pawpaw-adopt.vercel.app" class="adoption-cta-button">
         Adopsi Hewan <PawPrint :size="18" class="inline" />
       </a>
 

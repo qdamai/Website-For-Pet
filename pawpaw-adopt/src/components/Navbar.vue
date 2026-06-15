@@ -11,14 +11,14 @@
 
         <div class="mode-toggle">
           <a 
-            href="http://localhost:5174" 
+            href="https://pawpaw-finder.vercel.app" 
             class="mode-segment" 
             :class="{ 'is-active': !true }"
           >
             Finder
           </a>
           <a 
-            href="http://localhost:5173" 
+            href="https://pawpaw-adopt.vercel.app" 
             class="mode-segment" 
             :class="{ 'is-active': true }"
           >
