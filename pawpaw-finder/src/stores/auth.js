@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', {
     },
     async fetchProfile(uid) {
       try {
-        const docRef = doc(db, 'users', uid);
+        const docRef = doc(db, 'finder_users', uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           this.profile = docSnap.data();
@@ -73,6 +73,23 @@ export const useAuthStore = defineStore('auth', {
           this.user = { uid, email };
           localStorage.setItem('hardcodedUid', uid);
           await this.fetchProfile(uid);
+
+          if (!this.profile) {
+            const namePart = email.split('@')[0];
+            const newProfile = {
+              uid,
+              fullname: namePart.charAt(0).toUpperCase() + namePart.slice(1),
+              email,
+              role: isAdmin ? 'admin' : 'user',
+              phone: '',
+              profilePhoto: `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(namePart)}`,
+              bio: 'Administrator / Demo Account',
+              location: 'Unknown',
+              createdAt: new Date()
+            };
+            await setDoc(doc(db, 'finder_users', uid), newProfile);
+            this.profile = newProfile;
+          }
           return;
         }
         // ------------------------------
@@ -97,13 +114,12 @@ export const useAuthStore = defineStore('auth', {
           email,
           role: 'user', // Default role
           phone: '',
-          profilePhoto: 'https://images.unsplash.com/photo-1544168190-79c154273140', // Default cartoonish avatar
-          bio: '',
-          location: '',
+          profilePhoto: `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(fullname)}`,
+          bio: 'Pengguna baru Pawpaw Finder.',
           createdAt: new Date()
         };
         
-        await setDoc(doc(db, 'users', user.uid), newProfile);
+        await setDoc(doc(db, 'finder_users', user.uid), newProfile);
         this.profile = newProfile;
       } catch (err) {
         this.error = err.message;

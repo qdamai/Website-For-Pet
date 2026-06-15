@@ -29,7 +29,7 @@
       </div>
 
       <!-- Card 3: Verifikasi Shelter -->
-      <div @click="activeTab = 'shelters'" class="admin-card" :class="{ 'active-card': activeTab === 'shelters' }">
+      <div @click="activeTab = 'adopt_shelters'" class="admin-card" :class="{ 'active-card': activeTab === 'adopt_shelters' }">
         <div class="icon-box bg-green">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
         </div>
@@ -68,9 +68,10 @@
 
     <!-- Kontainer Tabel Laporan Tertunda -->
     <div v-if="activeTab === 'reports'" class="table-container">
-      <h3 class="section-title">{{ langStore.t('pendingReports') }}</h3>
-      
-      <div v-if="loading" class="text-center font-bold">{{ langStore.t('loadingReports') }}</div>
+      <h3 class="section-title">{{ langStore.t('manageReports') }}</h3>
+      <div v-if="loading" class="loading-state">
+        <SkeletonLoader v-for="i in 3" :key="i" height="60px" class="mb-2" />
+      </div>
       <div v-else-if="pendingReports.length === 0" class="empty-module">
         {{ langStore.t('noPendingReports') }}
       </div>
@@ -105,7 +106,9 @@
     <!-- Kontainer Manajemen User -->
     <div v-if="activeTab === 'users'" class="table-container">
       <h3 class="section-title">{{ langStore.t('manageUsers') }}</h3>
-      <div v-if="loadingUsers" class="text-center font-bold">{{ langStore.t('loadingUsers') }}</div>
+      <div v-if="loadingUsers" class="loading-state">
+        <SkeletonLoader v-for="i in 3" :key="i" height="40px" class="mb-2" />
+      </div>
       <div v-else class="table-scroll">
         <table class="neo-table">
           <thead>
@@ -133,9 +136,11 @@
     </div>
 
     <!-- Kontainer Verifikasi Shelter -->
-    <div v-if="activeTab === 'shelters'" class="table-container">
+    <div v-if="activeTab === 'adopt_shelters'" class="table-container">
       <h3 class="section-title">Kelola Verifikasi Shelter</h3>
-      <div v-if="loadingShelters" class="text-center font-bold">Memproses data shelter...</div>
+      <div v-if="loadingShelters" class="loading-state">
+        <SkeletonLoader v-for="i in 3" :key="i" height="40px" class="mb-2" />
+      </div>
       <div v-else-if="shelterList.length === 0" class="empty-module">
         Tidak ada shelter terdaftar saat ini.
       </div>
@@ -173,7 +178,9 @@
     <!-- Kontainer Moderasi Hewan Adopsi -->
     <div v-if="activeTab === 'pets'" class="table-container">
       <h3 class="section-title">Moderasi Hewan Adopsi</h3>
-      <div v-if="loadingPets" class="text-center font-bold">Memuat data hewan...</div>
+      <div v-if="loadingPets" class="loading-state">
+        <SkeletonLoader v-for="i in 3" :key="i" height="60px" class="mb-2" />
+      </div>
       <div v-else-if="petList.length === 0" class="empty-module">
         Tidak ada hewan terdaftar di katalog adopsi.
       </div>
@@ -218,13 +225,18 @@
       <h3 class="section-title">System Tools: Database Seeder</h3>
       <p class="text-gray mb-6">Menu khusus administrator untuk mengatur data simulasi sistem Pawpaw Finder secara instan.</p>
       
-      <div class="seeder-single-container">
+      <div class="seeder-grid">
         <div class="seeder-card card-full">
           <h4>Reset &amp; Seed Database</h4>
           <p class="mb-4">Membersihkan seluruh data lama (hewan adopsi, request, notifikasi, janji temu, dll) dan menanam ulang 20 data anabul baru secara otomatis dengan deskripsi dinamis dan unik.</p>
           <button class="btn-seeder btn-seeder-all" @click="runResetAndSeed" :disabled="loadingSeed">
             {{ loadingSeed ? '⏳ Memproses...' : '🔄 Hapus &amp; Seed Data Baru' }}
           </button>
+        </div>
+        <div class="seeder-card">
+          <h4>Seed Finder Data & Users</h4>
+          <p>Tambahkan 3 Admin, 1 User, dan contoh laporan Lost & Found Pets.</p>
+          <button class="btn-seeder" @click="runSeed('all')">Seed Finder Data</button>
         </div>
       </div>
     </div>
@@ -235,10 +247,15 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { getPetFallbackImage } from '../utils/helpers';
+import { useAuthStore } from '../stores/auth';
 import { useLangStore } from '../stores/lang';
+import SkeletonLoader from '../components/SkeletonLoader.vue';
+import { getPetFallbackImage } from '../utils/helpers';
 import { 
-  resetAndSeedAllData 
+  resetAndSeedAllData,
+  forceSeedDatabase,
+  clearAllData,
+  seedAllData
 } from '../utils/seeder';
 import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
@@ -265,7 +282,7 @@ watch(activeTab, (newTab) => {
   if (newTab === 'users' && userList.value.length === 0) {
     fetchUsers();
   }
-  if (newTab === 'shelters') {
+  if (newTab === 'adopt_shelters') {
     fetchShelters();
   }
   if (newTab === 'pets') {
@@ -276,7 +293,7 @@ watch(activeTab, (newTab) => {
 const fetchPendingReports = async () => {
   loading.value = true;
   try {
-    const q = query(collection(db, 'found_pets'), where('status', '==', 'Pending Match'));
+    const q = query(collection(db, 'finder_found_pets'), where('status', '==', 'Pending Match'));
     const snap = await getDocs(q);
     pendingReports.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
@@ -289,7 +306,7 @@ const fetchPendingReports = async () => {
 const approveReport = async (id) => {
   if(confirm('Setujui laporan ini agar tampil publik secara resmi?')) {
     try {
-      await updateDoc(doc(db, 'found_pets', id), { status: 'Verified' });
+      await updateDoc(doc(db, 'finder_found_pets', id), { status: 'Verified' });
       pendingReports.value = pendingReports.value.filter(r => r.id !== id);
     } catch (err) {
       alert('Gagal menyetujui: ' + err.message);
@@ -300,7 +317,7 @@ const approveReport = async (id) => {
 const deleteReport = async (id) => {
   if(confirm('Anda yakin ingin menghapus laporan spam/palsu ini?')) {
     try {
-      await deleteDoc(doc(db, 'found_pets', id));
+      await deleteDoc(doc(db, 'finder_found_pets', id));
       pendingReports.value = pendingReports.value.filter(r => r.id !== id);
     } catch (err) {
       alert('Gagal menghapus: ' + err.message);
@@ -311,7 +328,7 @@ const deleteReport = async (id) => {
 const fetchUsers = async () => {
   loadingUsers.value = true;
   try {
-    const snap = await getDocs(collection(db, 'users'));
+    const snap = await getDocs(collection(db, 'finder_users'));
     userList.value = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
   } catch (err) {
     console.error(err);
@@ -323,7 +340,7 @@ const fetchUsers = async () => {
 const deleteUser = async (uid) => {
   if(confirm('Anda yakin ingin menghapus user ini selamanya?')) {
     try {
-      await deleteDoc(doc(db, 'users', uid));
+      await deleteDoc(doc(db, 'finder_users', uid));
       userList.value = userList.value.filter(u => u.uid !== uid);
     } catch (err) {
       alert('Gagal menghapus: ' + err.message);
@@ -335,7 +352,7 @@ const deleteUser = async (uid) => {
 const fetchShelters = async () => {
   loadingShelters.value = true;
   try {
-    const snap = await getDocs(collection(db, 'shelters'));
+    const snap = await getDocs(collection(db, 'adopt_shelters'));
     shelterList.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.error(err);
@@ -347,12 +364,12 @@ const fetchShelters = async () => {
 const verifyShelter = async (id, newStatus) => {
   if (confirm(`Ubah status verifikasi shelter menjadi ${newStatus}?`)) {
     try {
-      await updateDoc(doc(db, 'shelters', id), { status: newStatus });
+      await updateDoc(doc(db, 'adopt_shelters', id), { status: newStatus });
       const shelter = shelterList.value.find(s => s.id === id);
       if (shelter) {
         shelter.status = newStatus;
         if (shelter.userId && newStatus === 'Verified') {
-          await updateDoc(doc(db, 'users', shelter.userId), { role: 'shelter' });
+          await updateDoc(doc(db, 'finder_users', shelter.userId), { role: 'shelter' });
         }
       }
       alert(`Shelter berhasil di-update menjadi ${newStatus}!`);
@@ -366,7 +383,7 @@ const verifyShelter = async (id, newStatus) => {
 const fetchPets = async () => {
   loadingPets.value = true;
   try {
-    const snap = await getDocs(collection(db, 'adoption_pets'));
+    const snap = await getDocs(collection(db, 'adopt_pets'));
     petList.value = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.error(err);
@@ -379,15 +396,15 @@ const moderatePet = async (id, action) => {
   if (confirm(`Lakukan moderasi [${action}] pada anabul ini?`)) {
     try {
       if (action === 'approve') {
-        await updateDoc(doc(db, 'adoption_pets', id), { approvedByAdmin: true });
+        await updateDoc(doc(db, 'adopt_pets', id), { approvedByAdmin: true });
         const pet = petList.value.find(p => p.id === id);
         if (pet) pet.approvedByAdmin = true;
       } else if (action === 'reject') {
-        await updateDoc(doc(db, 'adoption_pets', id), { approvedByAdmin: false });
+        await updateDoc(doc(db, 'adopt_pets', id), { approvedByAdmin: false });
         const pet = petList.value.find(p => p.id === id);
         if (pet) pet.approvedByAdmin = false;
       } else if (action === 'deactivate') {
-        await updateDoc(doc(db, 'adoption_pets', id), { status: 'Deactivated' });
+        await updateDoc(doc(db, 'adopt_pets', id), { status: 'Deactivated' });
         const pet = petList.value.find(p => p.id === id);
         if (pet) pet.status = 'Deactivated';
       }
@@ -418,10 +435,49 @@ const runResetAndSeed = async () => {
   }
 };
 
+const runClearData = async () => {
+  if(confirm('PERINGATAN! Anda yakin ingin menghapus SELURUH data seeding di semua koleksi? Aksi ini tidak dapat dibatalkan!')) {
+    try {
+      const res = await clearAllData();
+      alert(res.message);
+      fetchUsers();
+    } catch (err) {
+      alert('Gagal menghapus data: ' + err.message);
+    }
+  }
+};
+
+const runSeed = async (type) => {
+  let confirmed = false;
+  if (type === 'all') {
+    confirmed = confirm("Anda yakin ingin menanam seluruh data dummy? Proses ini membutuhkan waktu beberapa detik.");
+  } else {
+    confirmed = confirm(`Jalankan seeder untuk kategori [${type}]?`);
+  }
+
+  if (confirmed) {
+    loadingSeed.value = true;
+    try {
+      let res;
+      if (type === 'all') res = await seedAllData();
+      
+      if (res && res.success) {
+        alert(res.message);
+      } else {
+        alert(res?.message || 'Gagal menanam data.');
+      }
+    } catch (err) {
+      alert("Gagal menanam data: " + err.message);
+    } finally {
+      loadingSeed.value = false;
+    }
+  }
+};
+
 const exportData = async () => {
   try {
-    const lostSnap = await getDocs(collection(db, 'lost_pets'));
-    const foundSnap = await getDocs(collection(db, 'found_pets'));
+    const lostSnap = await getDocs(collection(db, 'finder_lost_pets'));
+    const foundSnap = await getDocs(collection(db, 'finder_found_pets'));
     
     const docPdf = new jsPDF();
     
@@ -561,7 +617,7 @@ const exportData = async () => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
 }
 
 .btn-kembali {
@@ -569,16 +625,16 @@ const exportData = async () => {
   background-color: #FF8A65;
   color: #1A1A1A;
   font-weight: 800;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-kembali:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .admin-grid {
@@ -590,29 +646,33 @@ const exportData = async () => {
 
 .admin-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
 }
 
 .admin-card:hover {
   transform: translateY(-4px);
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .admin-card.active-card {
   background-color: #000000;
   border-color: #FF8A65;
+  color: #FFFFFF;
+}
+.admin-card.active-card p {
+  color: #aaaaaa;
 }
 
 .icon-box {
   width: 48px;
   height: 48px;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -637,28 +697,28 @@ const exportData = async () => {
 .admin-card p {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: var(--color-text);
 }
 
 .table-container {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .section-title {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin-bottom: 1.5rem;
 }
 
 .table-scroll {
   overflow-x: auto;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
 }
 
@@ -670,8 +730,8 @@ const exportData = async () => {
 
 .neo-table th {
   background-color: #B39DDB;
-  border-bottom: 3px solid #000000;
-  border-right: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
+  border-right: var(--border-width) solid var(--color-border);
   padding: 1rem;
   font-weight: 800;
   color: #1A1A1A;
@@ -683,23 +743,23 @@ const exportData = async () => {
 
 .neo-table td {
   padding: 1rem;
-  border-bottom: 3px solid #000000;
-  border-right: 3px solid #000000;
-  background-color: #1A1A1A;
-  color: #FFFFFF;
+  border-bottom: var(--border-width) solid var(--color-border);
+  border-right: var(--border-width) solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text-dark);
   vertical-align: middle;
 }
 
 .neo-table td:last-child { border-right: none; }
 .neo-table tr:last-child td { border-bottom: none; }
-.neo-table tr:hover td { background-color: #262626; }
+.neo-table tr:hover td { background-color: var(--color-card-bg); }
 
-.font-bold { font-weight: 800; color: #FFFFFF; }
-.text-gray { font-weight: 700; color: #aaaaaa; }
+.font-bold { font-weight: 800; color: var(--color-text-dark); }
+.text-gray { font-weight: 700; color: var(--color-text); }
 
 .badge {
   background-color: #FFF176;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -718,12 +778,12 @@ const exportData = async () => {
 
 .btn-approve, .btn-delete, .btn-seeder {
   padding: 0.5rem 0.75rem;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 8px;
   font-weight: 800;
   font-size: 0.75rem;
   cursor: pointer;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: var(--shadow-neo);
   transition: all 0.2s;
 }
 
@@ -754,12 +814,12 @@ const exportData = async () => {
 
 .seeder-card {
   background-color: #1a1a1a;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 16px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   color: #ffffff;
 }
 

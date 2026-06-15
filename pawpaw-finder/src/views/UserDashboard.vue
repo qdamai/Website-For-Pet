@@ -85,7 +85,7 @@
               <span class="bg-[#fee2e2] text-[#991b1b] text-xs font-bold px-3 py-1 rounded-full">Missing</span>
             </div>
             <p class="text-sm text-[#64748b] mb-2 font-medium">{{ pet.type }} • {{ pet.breed }} • {{ pet.color }}</p>
-            <p class="text-sm font-semibold text-[#475569] truncate">📍 {{ pet.location || pet.lastLocation }}</p>
+            <p class="text-sm font-semibold text-[#475569] truncate"><MapPin :size="18" class="inline" /> {{ pet.location || pet.lastLocation }}</p>
             
             <Button variant="white" block size="sm" class="mt-5" @click="$router.push(`/pet/lost/${pet.id}`)">Lihat Detail</Button>
           </div>
@@ -96,6 +96,7 @@
 </template>
 
 <script setup>
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon } from 'lucide-vue-next';
 import { usePetStore } from '../stores/petStore'
 import { getPetFallbackImage } from '../utils/helpers'
 import Card from '../components/ui/Card.vue'

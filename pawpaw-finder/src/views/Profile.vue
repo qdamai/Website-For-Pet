@@ -6,7 +6,7 @@
       <!-- Sidebar / User Info Card -->
       <div class="profile-card sidebar">
         <div class="avatar-wrapper">
-          <img :src="profile?.profilePhoto || 'https://api.dicebear.com/7.x/notionists/svg?seed=pawpaw'" alt="Profile" class="avatar-img">
+          <img :src="profile?.profilePhoto || `https://api.dicebear.com/7.x/notionists/svg?seed=${profile?.fullname || 'pawpaw'}`" alt="Profile" class="avatar-img">
         </div>
         <h2 class="user-name">{{ profile?.fullname || 'Pengguna' }}</h2>
         <p class="user-meta">{{ profile?.email }}</p>
@@ -97,7 +97,7 @@
             <!-- TAB 1: Laporan Saya -->
             <div v-if="activeTab === 'reports'">
               <div v-if="loadingReports" class="loading-state">
-                <SkeletonLoader height="80px" v-for="i in 3" :key="i" />
+                <SkeletonLoader v-for="i in 2" :key="i" height="100px" class="mb-4" />
               </div>
               <div v-else-if="myReports.length === 0">
                 <EmptyState title="Belum Ada Laporan" description="Anda belum membuat laporan hewan hilang atau ditemukan." />
@@ -212,7 +212,7 @@ const saveProfile = async () => {
       finalPhotoUrl = await getDownloadURL(avatarRef);
     }
 
-    const userDocRef = doc(db, 'users', authStore.user.uid);
+    const userDocRef = doc(db, 'finder_users', authStore.user.uid);
     const updatedProfile = {
       ...profile.value,
       fullname: editData.fullname,
@@ -243,8 +243,8 @@ const saveProfile = async () => {
 const fetchReports = async () => {
   loadingReports.value = true;
   try {
-    const lostQ = query(collection(db, 'lost_pets'), where('userId', '==', authStore.user.uid));
-    const foundQ = query(collection(db, 'found_pets'), where('userId', '==', authStore.user.uid));
+    const lostQ = query(collection(db, 'finder_lost_pets'), where('userId', '==', authStore.user.uid));
+    const foundQ = query(collection(db, 'finder_found_pets'), where('userId', '==', authStore.user.uid));
     
     const [lostSnap, foundSnap] = await Promise.all([getDocs(lostQ), getDocs(foundQ)]);
     
@@ -309,10 +309,10 @@ const goToDetail = (rep) => {
 
 .profile-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .avatar-wrapper {
@@ -325,9 +325,9 @@ const goToDetail = (rep) => {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   object-fit: cover;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   background-color: #1A1A1A;
 }
 
@@ -360,7 +360,7 @@ const goToDetail = (rep) => {
   font-weight: 800;
   padding: 0.4rem 0.8rem;
   border-radius: 999px;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   white-space: nowrap;
 }
 
@@ -369,7 +369,7 @@ const goToDetail = (rep) => {
 
 .bio-box {
   background-color: #1A1A1A;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -384,9 +384,9 @@ const goToDetail = (rep) => {
   padding: 0.75rem 1.5rem;
   background-color: #FF8A65;
   color: #1A1A1A;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
@@ -402,7 +402,7 @@ const goToDetail = (rep) => {
 /* TABS */
 .tabs-header {
   display: flex;
-  border-bottom: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
   margin-bottom: 2rem;
   overflow-x: auto;
 }
@@ -414,7 +414,7 @@ const goToDetail = (rep) => {
   padding: 1rem 1.5rem;
   background: transparent;
   border: none;
-  border-right: 3px solid #000000;
+  border-right: var(--border-width) solid var(--color-border);
   cursor: pointer;
   color: #aaaaaa;
   white-space: nowrap;
@@ -425,8 +425,8 @@ const goToDetail = (rep) => {
 .tab-btn:hover { background-color: #1A1A1A; }
 
 .tab-btn.active {
-  background-color: #000000;
-  color: #FFFFFF;
+  background-color: var(--color-primary);
+  color: #1A1A1A;
 }
 
 .list-container {
@@ -441,16 +441,16 @@ const goToDetail = (rep) => {
   align-items: center;
   padding: 1.25rem;
   background-color: #1A1A1A;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 16px;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .list-item:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .item-title {
@@ -473,7 +473,7 @@ const goToDetail = (rep) => {
   font-weight: 800;
   padding: 0.5rem 1rem;
   border-radius: 12px;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
 }
 
 .bg-orange { background-color: #FF8A65; color: #1A1A1A; }
@@ -503,16 +503,16 @@ const goToDetail = (rep) => {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   object-fit: cover;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .success-msg {
   background-color: #A7F3D0;
   color: #065F46;
   padding: 0.75rem;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
   font-weight: bold;
 }
@@ -521,7 +521,7 @@ const goToDetail = (rep) => {
   background-color: #FECACA;
   color: #991B1B;
   padding: 0.75rem;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
   font-weight: bold;
 }

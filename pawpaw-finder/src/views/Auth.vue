@@ -65,11 +65,28 @@
         </span>
       </div>
 
+      <!-- Demo Accounts (Hidden for Production) -->
+      <div v-if="isLogin" class="demo-accounts" style="display: none;">
+        <p class="demo-title"><Wrench class="inline" /> Login Cepat Admin (Demo)</p>
+        <div class="demo-list">
+          <div class="demo-item" @click="fillAdmin('nazira')">
+            <span class="demo-role">Admin 1</span>
+            <span class="demo-email">nazira@pawpaw.com</span>
+          </div>
+          <div class="demo-item" @click="fillAdmin('damai')">
+            <span class="demo-role">Admin 2</span>
+            <span class="demo-email">damai@pawpaw.com</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
+import { Wrench } from 'lucide-vue-next';
+
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
@@ -86,6 +103,16 @@ const isSubmitting = ref(false);
 const toggleMode = () => {
   isLogin.value = !isLogin.value;
   authStore.error = null;
+};
+
+const fillAdmin = (type) => {
+  if (type === 'nazira') {
+    email.value = 'nazira@pawpaw.com';
+    password.value = 'pawpaw2026';
+  } else if (type === 'damai') {
+    email.value = 'damai@pawpaw.com';
+    password.value = 'pawpaw2026';
+  }
 };
 
 const handleSubmit = async () => {
@@ -143,9 +170,9 @@ const handleSubmit = async () => {
   max-width: 480px;
   padding: 2.5rem;
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 32px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   position: relative;
   z-index: 10;
 }
@@ -155,7 +182,7 @@ const handleSubmit = async () => {
   font-size: 2.25rem;
   font-weight: 800;
   text-align: center;
-  color: #FFFFFF;
+  color: var(--color-text);
   margin-bottom: 2rem;
 }
 
@@ -164,7 +191,7 @@ const handleSubmit = async () => {
   color: white;
   padding: 0.75rem;
   border-radius: 12px;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   margin-bottom: 1.5rem;
   font-weight: 800;
   text-align: center;
@@ -177,18 +204,18 @@ const handleSubmit = async () => {
 .form-group label {
   display: block;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text);
   margin-bottom: 0.5rem;
 }
 
 .neo-input {
   width: 100%;
   padding: 0.875rem 1rem;
-  background-color: #1A1A1A;
-  border: 3px solid #000000;
+  background-color: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
-  color: #FFFFFF;
-  font-weight: 600;
+  color: var(--color-text);
+  font-weight: 700;
   font-family: 'Nunito', sans-serif;
   font-size: 1rem;
   outline: none;
@@ -198,7 +225,7 @@ const handleSubmit = async () => {
 
 .neo-input:focus {
   border-color: #FF8A65;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   transform: translate(-2px, -2px);
 }
 
@@ -209,10 +236,10 @@ const handleSubmit = async () => {
   font-size: 1.25rem;
   padding: 1rem 1.5rem;
   background-color: #FF8A65;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 16px;
   color: #1A1A1A;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   transition: all 0.15s ease-in-out;
   cursor: pointer;
   outline: none;
@@ -222,7 +249,7 @@ const handleSubmit = async () => {
 .auth-btn:hover:not(:disabled) {
   background-color: #FF7A50;
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .auth-btn:active:not(:disabled) {
@@ -239,7 +266,7 @@ const handleSubmit = async () => {
   text-align: center;
   margin-top: 1.5rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text);
 }
 
 .toggle-link {
@@ -249,6 +276,56 @@ const handleSubmit = async () => {
 
 .toggle-link:hover {
   text-decoration: underline;
+}
+
+.demo-accounts {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 3px dashed #000000;
+}
+
+.demo-title {
+  text-align: center;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.demo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.demo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-neo);
+}
+
+.demo-item:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-neo);
+  background-color: #B39DDB;
+}
+
+.demo-role {
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.demo-email {
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0.8;
+  color: var(--color-text);
 }
 
 @media (max-width: 480px) {

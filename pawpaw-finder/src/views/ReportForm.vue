@@ -290,7 +290,7 @@ const submitForm = async () => {
     }
 
     const isLost = form.value.reportType === 'lost';
-    const collName = isLost ? 'lost_pets' : 'found_pets';
+    const collName = isLost ? 'finder_lost_pets' : 'finder_found_pets';
     const idPrefix = isLost ? 'pet_' : 'rep_';
     const newId = idPrefix + Date.now().toString();
 
@@ -347,27 +347,27 @@ const submitForm = async () => {
   width: 100%;
   max-height: 250px;
   object-fit: cover;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 16px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 .error-msg {
   background-color: #FECACA;
   color: #991B1B;
   padding: 1rem;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
   font-weight: bold;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 .success-msg {
   background-color: #A7F3D0;
   color: #065F46;
   padding: 1rem;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
   font-weight: bold;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 @media (max-width: 640px) {
   .grid-2 {

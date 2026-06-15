@@ -13,14 +13,7 @@ const routes = [
   { path: '/profile', name: 'Profile', component: () => import('../views/Profile.vue'), meta: { requiresAuth: true } },
   { path: '/admin', name: 'AdminPanel', component: () => import('../views/AdminPanel.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
   
-  // Adoption Module routes
-  { path: '/adoption', name: 'AdoptionCatalog', component: () => import('../views/AdoptionCatalog.vue') },
-  { path: '/adoption/pet/:id', name: 'AdoptionPetDetail', component: () => import('../views/AdoptionPetDetail.vue') },
-  { path: '/adoption/apply/:id', name: 'AdoptionForm', component: () => import('../views/AdoptionForm.vue'), meta: { requiresAuth: true } },
-  { path: '/adoption/quiz', name: 'AdoptionQuiz', component: () => import('../views/AdoptionQuiz.vue') },
-  { path: '/adoption/compare', name: 'AdoptionCompare', component: () => import('../views/AdoptionCompare.vue') },
-  { path: '/adoption/stories', name: 'AdoptionStories', component: () => import('../views/AdoptionStories.vue') },
-  { path: '/adoption/dashboard', name: 'AdoptionDashboard', component: () => import('../views/AdoptionDashboard.vue'), meta: { requiresAuth: true } },
+
 ];
 
 export const router = createRouter({

@@ -13,19 +13,19 @@
     <!-- Analytics Dashboard for Shelter -->
     <div v-if="isShelter" class="stats-grid">
       <div class="stat-card bg-blue">
-        <span class="num">{{ shelterStats.totalPets }}</span>
+        <span class="num">{{ adopt_shelterstats.totalPets }}</span>
         <span class="lbl">Total Hewan</span>
       </div>
       <div class="stat-card bg-green">
-        <span class="num">{{ shelterStats.availablePets }}</span>
+        <span class="num">{{ adopt_shelterstats.availablePets }}</span>
         <span class="lbl">Tersedia</span>
       </div>
       <div class="stat-card bg-yellow">
-        <span class="num">{{ shelterStats.adoptedPets }}</span>
+        <span class="num">{{ adopt_shelterstats.adoptedPets }}</span>
         <span class="lbl">Diadopsi</span>
       </div>
       <div class="stat-card bg-orange">
-        <span class="num">{{ shelterStats.newRequests }}</span>
+        <span class="num">{{ adopt_shelterstats.newRequests }}</span>
         <span class="lbl">Pengajuan Baru</span>
       </div>
     </div>
@@ -42,15 +42,17 @@
           class="menu-btn"
           :class="{ 'active-btn': activeTab === tab.id }"
         >
-          <span class="icon">{{ tab.icon }}</span>
+          <span class="icon">
+            <component :is="tab.icon" :size="18" class="inline" />
+          </span>
           <span class="text">{{ tab.name }}</span>
         </button>
       </aside>
 
       <!-- Content Column -->
       <main class="content-display">
-        <div v-if="loadingData" class="loading-state text-center font-bold py-10">
-          Memuat data dashboard...
+        <div v-if="loadingData" class="loading-state">
+          <SkeletonLoader v-for="i in 3" :key="i" height="150px" class="mb-4" />
         </div>
 
         <div v-else>
@@ -60,9 +62,9 @@
           <section v-if="activeTab === 'my_requests'" class="dashboard-section">
             <h2 class="section-title">Status Pengajuan Adopsi</h2>
             <div v-if="userRequests.length === 0" class="empty-dashboard-state">
-              <span class="icon">📝</span>
+              <span class="icon"><FileText :size="32" /></span>
               <p class="text">Anda belum pernah mengirim pengajuan adopsi anabul apa pun.</p>
-              <router-link to="/adoption" class="btn-neo mt-4">Jelajahi Katalog</router-link>
+              <router-link to="/" class="btn-neo mt-4">Jelajahi Katalog</router-link>
             </div>
             
             <div v-else class="requests-list">
@@ -99,16 +101,16 @@
             </div>
           </section>
 
-          <!-- Tab: Jadwal Kunjungan (My Appointments) -->
-          <section v-if="activeTab === 'my_appointments'" class="dashboard-section">
+          <!-- Tab: Jadwal Kunjungan (My adopt_appointments) -->
+          <section v-if="activeTab === 'my_adopt_appointments'" class="dashboard-section">
             <h2 class="section-title">Jadwal Kunjungan Shelter</h2>
-            <div v-if="userAppointments.length === 0" class="empty-dashboard-state">
-              <span class="icon">📅</span>
+            <div v-if="useradopt_appointments.length === 0" class="empty-dashboard-state">
+              <span class="icon"><Calendar :size="18" class="inline" /></span>
               <p class="text">Belum ada jadwal kunjungan terdaftar.</p>
             </div>
             
-            <div v-else class="appointments-grid">
-              <div v-for="apt in userAppointments" :key="apt.id" class="apt-item-card">
+            <div v-else class="adopt_appointments-grid">
+              <div v-for="apt in useradopt_appointments" :key="apt.id" class="apt-item-card">
                 <div class="apt-header">
                   <img :src="apt.petPhoto" alt="Pet" class="apt-pet-img" />
                   <div>
@@ -117,9 +119,9 @@
                   </div>
                 </div>
                 <div class="apt-details border-t-2 border-black my-4 pt-3">
-                  <p>📅 Tanggal: <b>{{ apt.date }}</b></p>
-                  <p>🕒 Jam: <b>{{ apt.time }} WIB</b></p>
-                  <p>📝 Catatan: {{ apt.notes || '-' }}</p>
+                  <p><Calendar :size="18" class="inline" /> Tanggal: <b>{{ apt.date }}</b></p>
+                  <p><Clock class="inline" /> Jam: <b>{{ apt.time }} WIB</b></p>
+                  <p><FileText :size="18" class="inline" /> Catatan: {{ apt.notes || '-' }}</p>
                 </div>
                 <span class="badge apt-status" :class="apt.status.toLowerCase()">
                   {{ apt.status }}
@@ -132,12 +134,12 @@
           <section v-if="activeTab === 'my_wishlist'" class="dashboard-section">
             <h2 class="section-title">Wishlist Saya</h2>
             <div v-if="wishlistPets.length === 0" class="empty-dashboard-state">
-              <span class="icon">💖</span>
+              <span class="icon"><Heart :size="18" class="inline" /></span>
               <p class="text">Katalog favorit Anda kosong. Klik icon hati pada katalog adopsi.</p>
             </div>
             
             <div v-else class="grid-wishlist">
-              <div v-for="pet in wishlistPets" :key="pet.id" class="wish-item-card" @click="router.push(`/adoption/pet/${pet.id}`)">
+              <div v-for="pet in wishlistPets" :key="pet.id" class="wish-item-card" @click="router.push(`/pet/${pet.id}`)">
                 <img :src="pet.photo" alt="Photo" class="wish-img" />
                 <div class="wish-info">
                   <h4>{{ pet.name }}</h4>
@@ -151,14 +153,14 @@
           <!-- Tab: Notification Center -->
           <section v-if="activeTab === 'notifications'" class="dashboard-section">
             <h2 class="section-title">Notifikasi Sistem</h2>
-            <div v-if="userNotifications.length === 0" class="empty-dashboard-state">
-              <span class="icon">🔔</span>
+            <div v-if="useradopt_notifications.length === 0" class="empty-dashboard-state">
+              <span class="icon"><Bell class="inline" /></span>
               <p class="text">Tidak ada notifikasi sistem masuk.</p>
             </div>
             
-            <div v-else class="notifications-list">
+            <div v-else class="adopt_notifications-list">
               <div 
-                v-for="notif in userNotifications" 
+                v-for="notif in useradopt_notifications" 
                 :key="notif.id" 
                 class="notif-item-card"
                 :class="{ 'notif-unread': !notif.read }"
@@ -184,7 +186,7 @@
             </div>
 
             <div v-if="shelterPets.length === 0" class="empty-dashboard-state">
-              <span class="icon">🐶</span>
+              <span class="icon"><Dog class="inline" /></span>
               <p class="text">Anda belum mendaftarkan anabul di shelter Anda.</p>
             </div>
 
@@ -200,9 +202,9 @@
                   </div>
                   
                   <div class="flex gap-2">
-                    <button @click="openEditPassport(pet)" class="btn-neo btn-med">🏥 Passport</button>
-                    <button @click="openEditPetModal(pet)" class="btn-neo btn-edit">📝 Edit</button>
-                    <button @click="deletePet(pet.id)" class="btn-neo btn-delete">🗑️ Hapus</button>
+                    <button @click="openEditPassport(pet)" class="btn-neo btn-med"><Stethoscope class="inline" /> Passport</button>
+                    <button @click="openEditPetModal(pet)" class="btn-neo btn-edit"><FileText :size="18" class="inline" /> Edit</button>
+                    <button @click="deletePet(pet.id)" class="btn-neo btn-delete"><Trash2 class="inline" /> Hapus</button>
                   </div>
                 </div>
               </div>
@@ -213,7 +215,7 @@
           <section v-if="activeTab === 'shelter_requests'" class="dashboard-section">
             <h2 class="section-title">Kelola Pengajuan Masuk</h2>
             <div v-if="shelterRequests.length === 0" class="empty-dashboard-state">
-              <span class="icon">📩</span>
+              <span class="icon"><Mail class="inline" /></span>
               <p class="text">Tidak ada berkas pengajuan masuk.</p>
             </div>
 
@@ -233,18 +235,18 @@
                 </div>
 
                 <div class="req-detail-box">
-                  <p>📍 <b>Alamat:</b> {{ req.address }}, {{ req.city }}</p>
-                  <p>📞 <b>Kontak:</b> {{ req.phone }}</p>
-                  <p>💼 <b>Pekerjaan &amp; Pendapatan:</b> {{ req.job }} ({{ req.income }})</p>
-                  <p>🏠 <b>Pengalaman Memelihara:</b> {{ req.experience }}</p>
-                  <p>📝 <b>Alasan Mengadopsi:</b> {{ req.reason }}</p>
+                  <p><MapPin :size="18" class="inline" /> <b>Alamat:</b> {{ req.address }}, {{ req.city }}</p>
+                  <p><Phone class="inline" /> <b>Kontak:</b> {{ req.phone }}</p>
+                  <p><Briefcase class="inline" /> <b>Pekerjaan &amp; Pendapatan:</b> {{ req.job }} ({{ req.income }})</p>
+                  <p><Home :size="18" class="inline" /> <b>Pengalaman Memelihara:</b> {{ req.experience }}</p>
+                  <p><FileText :size="18" class="inline" /> <b>Alasan Mengadopsi:</b> {{ req.reason }}</p>
                 </div>
 
                 <div class="flex justify-end gap-2 mt-4 flex-wrap">
                   <button v-if="req.status === 'Application Submitted'" @click="updateRequestStatus(req, 'Under Review')" class="btn-neo btn-med">Review Berkas</button>
                   <button v-if="req.status === 'Under Review'" @click="openInterviewModal(req)" class="btn-neo btn-edit">Jadwalkan Interview</button>
                   <button v-if="req.status === 'Interview Scheduled' || req.status === 'Interview Completed'" @click="updateRequestStatus(req, 'Approved')" class="btn-neo btn-submit-apt">Approve Adopsi</button>
-                  <button v-if="req.status === 'Approved'" @click="updateRequestStatus(req, 'Adopted')" class="btn-neo btn-share">Serah Terima Selesai 🤝</button>
+                  <button v-if="req.status === 'Approved'" @click="updateRequestStatus(req, 'Adopted')" class="btn-neo btn-share">Serah Terima Selesai <Handshake class="inline" /></button>
                   <button v-if="req.status !== 'Approved' && req.status !== 'Adopted' && req.status !== 'Rejected'" @click="updateRequestStatus(req, 'Rejected')" class="btn-neo btn-delete">Tolak</button>
                 </div>
               </div>
@@ -309,7 +311,7 @@
                   </form>
                 </template>
                 <div v-else class="empty-chat-stream flex flex-col items-center justify-center text-center py-20">
-                  <span class="text-4xl">💬</span>
+                  <span class="text-4xl"><MessageSquare :size="18" class="inline" /></span>
                   <p class="text-gray text-xs mt-2">Pilih salah satu percakapan di samping untuk mulai membalas chat.</p>
                 </div>
               </div>
@@ -318,7 +320,15 @@
 
         </div>
       </main>
+    </div>
 
+    <!-- Finder Banner -->
+    <div class="finder-banner bg-orange mt-8">
+      <h3 class="banner-title">Kehilangan atau Menemukan Hewan?</h3>
+      <p class="banner-subtitle">Bantu anabul kembali ke pemilik aslinya melalui portal Pawpaw Finder.</p>
+      <a :href="finderUrl" style="text-decoration: none;">
+        <button class="btn-finder">Buka Pawpaw Finder</button>
+      </a>
     </div>
 
     <!-- VISIT/INTERVIEW MODAL (SHELTER ROLE) -->
@@ -453,6 +463,7 @@
 </template>
 
 <script setup>
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon, Bell, List, Inbox, Handshake, Phone, Trash2, Mail, Stethoscope, Briefcase, Clock } from 'lucide-vue-next';
 import { ref, onMounted, computed, watch, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
@@ -480,6 +491,10 @@ const router = useRouter();
 const authStore = useAuthStore();
 const wishlistStore = useWishlistStore();
 
+const finderUrl = computed(() => {
+  return window.location.protocol + '//' + window.location.hostname + ':5173/';
+});
+
 const activeTab = ref('');
 const loadingData = ref(true);
 
@@ -494,9 +509,9 @@ const timelineSteps = [
 
 // Data variables
 const userRequests = ref([]);
-const userAppointments = ref([]);
+const useradopt_appointments = ref([]);
 const wishlistPets = ref([]);
-const userNotifications = ref([]);
+const useradopt_notifications = ref([]);
 const shelterPets = ref([]);
 const shelterRequests = ref([]);
 
@@ -521,24 +536,24 @@ const healthForm = ref({ vaccinated: false, sterilized: false, allergies: '', la
 const petForm = ref({ name: '', species: 'Cat', breed: '', gender: 'Male', age: 1, weight: 3.5, photo: '', description: '' });
 
 // Observers listeners
-let unsubConversations = null;
+let unsubadopt_chats = null;
 let unsubMessages = null;
-let unsubNotifications = null;
+let unsubadopt_notifications = null;
 
 const isShelter = computed(() => authStore.profile?.role === 'shelter');
 
 const tabs = {
   adopter: [
-    { id: 'my_requests', name: 'Pengajuan Adopsi', icon: '📝' },
-    { id: 'my_appointments', name: 'Jadwal Kunjungan', icon: '📅' },
-    { id: 'my_wishlist', name: 'Wishlist Saya', icon: '💖' },
-    { id: 'notifications', name: 'Notifikasi', icon: '🔔' },
-    { id: 'chat', name: 'Chat Realtime', icon: '💬' }
+    { id: 'my_requests', name: 'Pengajuan Adopsi', icon: FileText },
+    { id: 'my_adopt_appointments', name: 'Jadwal Kunjungan', icon: Calendar },
+    { id: 'my_wishlist', name: 'Wishlist Saya', icon: Heart },
+    { id: 'notifications', name: 'Notifikasi', icon: Bell },
+    { id: 'chat', name: 'Chat Realtime', icon: MessageSquare }
   ],
   shelter: [
-    { id: 'shelter_pets', name: 'Kelola Hewan', icon: '🐱' },
-    { id: 'shelter_requests', name: 'Pengajuan Masuk', icon: '📩' },
-    { id: 'chat', name: 'Chat Realtime', icon: '💬' }
+    { id: 'shelter_pets', name: 'Kelola Hewan', icon: List },
+    { id: 'shelter_requests', name: 'Pengajuan Masuk', icon: Inbox },
+    { id: 'chat', name: 'Chat Realtime', icon: MessageSquare }
   ]
 };
 
@@ -546,7 +561,7 @@ const visibleTabs = computed(() => {
   return isShelter.value ? tabs.shelter : tabs.adopter;
 });
 
-const shelterStats = computed(() => {
+const adopt_shelterstats = computed(() => {
   const total = shelterPets.value.length;
   const available = shelterPets.value.filter(p => p.status === 'Available').length;
   const adopted = shelterPets.value.filter(p => p.status === 'Adopted').length;
@@ -571,9 +586,9 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (unsubConversations) unsubConversations();
+  if (unsubadopt_chats) unsubadopt_chats();
   if (unsubMessages) unsubMessages();
-  if (unsubNotifications) unsubNotifications();
+  if (unsubadopt_notifications) unsubadopt_notifications();
 });
 
 watch(activeTab, async () => {
@@ -586,24 +601,24 @@ const loadData = async () => {
   try {
     if (isShelter.value) {
       if (activeTab.value === 'shelter_pets') {
-        const snap = await getDocs(query(collection(db, 'adoption_pets'), where('shelterId', '==', uid)));
+        const snap = await getDocs(query(collection(db, 'adopt_pets'), where('shelterId', '==', uid)));
         shelterPets.value = snap.docs.map(doc => doc.data());
       } else if (activeTab.value === 'shelter_requests') {
-        const snap = await getDocs(query(collection(db, 'adoption_requests'), where('shelterId', '==', uid)));
+        const snap = await getDocs(query(collection(db, 'adopt_requests'), where('shelterId', '==', uid)));
         shelterRequests.value = snap.docs.map(doc => doc.data());
       }
     } else {
       if (activeTab.value === 'my_requests') {
-        const snap = await getDocs(query(collection(db, 'adoption_requests'), where('adopterId', '==', uid)));
+        const snap = await getDocs(query(collection(db, 'adopt_requests'), where('adopterId', '==', uid)));
         userRequests.value = snap.docs.map(doc => doc.data());
-      } else if (activeTab.value === 'my_appointments') {
-        const snap = await getDocs(query(collection(db, 'appointments'), where('adopterId', '==', uid)));
-        userAppointments.value = snap.docs.map(doc => doc.data());
+      } else if (activeTab.value === 'my_adopt_appointments') {
+        const snap = await getDocs(query(collection(db, 'adopt/data/appointments'), where('adopterId', '==', uid)));
+        useradopt_appointments.value = snap.docs.map(doc => doc.data());
       } else if (activeTab.value === 'my_wishlist') {
         await wishlistStore.fetchWishlist(uid);
         const list = [];
         for (const petId of wishlistStore.wishlistedIds) {
-          const snap = await getDoc(doc(db, 'adoption_pets', petId));
+          const snap = await getDoc(doc(db, 'adopt_pets', petId));
           if (snap.exists()) list.push(snap.data());
         }
         wishlistPets.value = list;
@@ -620,8 +635,8 @@ const setupRealtimeListeners = () => {
   const uid = authStore.user.uid;
   
   // 1. Chat rooms listener
-  const qConv = query(collection(db, 'conversations'), where('participants', 'array-contains', uid));
-  unsubConversations = onSnapshot(qConv, (snapshot) => {
+  const qConv = query(collection(db, 'adopt_chats'), where('participants', 'array-contains', uid));
+  unsubadopt_chats = onSnapshot(qConv, (snapshot) => {
     chatRooms.value = snapshot.docs.map(d => d.data());
     
     // Auto-select room from query if present
@@ -631,17 +646,18 @@ const setupRealtimeListeners = () => {
     }
   });
 
-  // 2. Notifications listener (only for adopter roles)
+  // 2. adopt_notifications listener (only for adopter roles)
   if (!isShelter.value) {
-    const qNotif = query(collection(db, 'notifications'), where('userId', '==', uid));
-    unsubNotifications = onSnapshot(qNotif, (snapshot) => {
-      const docs = snapshot.docs.map(d => d.data());
+    const qNotif = query(collection(db, 'adopt_notifications'), where('userId', '==', uid));
+    unsubadopt_notifications = onSnapshot(qNotif, (snapshot) => {
+      let notifs = snapshot.docs.map(d => d.data());
       // Sort in Javascript to avoid composite index requirement
-      userNotifications.value = docs.sort((a, b) => {
+      notifs.sort((a, b) => {
         const timeA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : new Date(a.createdAt || 0).getTime();
         const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : new Date(b.createdAt || 0).getTime();
         return timeB - timeA;
       });
+      useradopt_notifications.value = notifs;
     });
   }
 };
@@ -650,7 +666,7 @@ const selectRoom = (room) => {
   activeRoom.value = room;
   if (unsubMessages) unsubMessages();
   
-  const qMsg = query(collection(db, `conversations/${room.id}/messages`), orderBy('timestamp', 'asc'));
+  const qMsg = query(collection(db, `adopt_chats/${room.id}/messages`), orderBy('timestamp', 'asc'));
   unsubMessages = onSnapshot(qMsg, (snapshot) => {
     messages.value = snapshot.docs.map(d => d.data());
     nextTick(() => {
@@ -674,8 +690,8 @@ const sendChatMessage = async () => {
   };
 
   try {
-    await addDoc(collection(db, `conversations/${activeRoom.value.id}/messages`), msgData);
-    await updateDoc(doc(db, 'conversations', activeRoom.value.id), {
+    await addDoc(collection(db, `adopt_chats/${activeRoom.value.id}/messages`), msgData);
+    await updateDoc(doc(db, 'adopt_chats', activeRoom.value.id), {
       lastMessage: txt,
       updatedAt: serverTimestamp()
     });
@@ -686,7 +702,7 @@ const sendChatMessage = async () => {
 
 const markNotifRead = async (id) => {
   try {
-    await updateDoc(doc(db, 'notifications', id), { read: true });
+    await updateDoc(doc(db, 'adopt_notifications', id), { read: true });
   } catch (err) {
     console.error(err);
   }
@@ -707,16 +723,16 @@ const formatDate = (dateStr) => {
 const updateRequestStatus = async (req, newStatus) => {
   if (confirm(`Ubah status pengajuan adopsi menjadi ${newStatus}?`)) {
     try {
-      await updateDoc(doc(db, 'adoption_requests', req.id), { status: newStatus });
+      await updateDoc(doc(db, 'adopt_requests', req.id), { status: newStatus });
       
       // Sync pet status accordingly
       if (newStatus === 'Approved') {
-        await updateDoc(doc(db, 'adoption_pets', req.petId), { status: 'Reserved' });
+        await updateDoc(doc(db, 'adopt_pets', req.petId), { status: 'Reserved' });
       } else if (newStatus === 'Adopted') {
-        await updateDoc(doc(db, 'adoption_pets', req.petId), { status: 'Adopted' });
+        await updateDoc(doc(db, 'adopt_pets', req.petId), { status: 'Adopted' });
         // Write a success stories placeholder trigger
         const storyId = `story_${Date.now()}`;
-        await setDoc(doc(db, 'success_stories', storyId), {
+        await setDoc(doc(db, 'adopt_stories', storyId), {
           id: storyId,
           petId: req.petId,
           petName: req.petName,
@@ -728,12 +744,12 @@ const updateRequestStatus = async (req, newStatus) => {
           createdAt: new Date().toISOString()
         });
       } else if (newStatus === 'Rejected') {
-        await updateDoc(doc(db, 'adoption_pets', req.petId), { status: 'Available' });
+        await updateDoc(doc(db, 'adopt_pets', req.petId), { status: 'Available' });
       }
 
       // Add Notification for adopter
       const notifId = `notif_${Date.now()}`;
-      await setDoc(doc(db, 'notifications', notifId), {
+      await setDoc(doc(db, 'adopt_notifications', notifId), {
         id: notifId,
         userId: req.adopterId,
         title: 'Status Pengajuan Diperbarui',
@@ -762,8 +778,8 @@ const submitInterviewSchedule = async () => {
     const req = activeRequest.value;
     const aptId = `APT_${Date.now()}`;
     
-    // Save to appointments
-    await setDoc(doc(db, 'appointments', aptId), {
+    // Save to adopt_appointments
+    await setDoc(doc(db, 'adopt/data/appointments', aptId), {
       id: aptId,
       type: 'Interview',
       petId: req.petId,
@@ -780,13 +796,13 @@ const submitInterviewSchedule = async () => {
     });
 
     // Update Request status to 'Interview Scheduled'
-    await updateDoc(doc(db, 'adoption_requests', req.id), {
+    await updateDoc(doc(db, 'adopt_requests', req.id), {
       status: 'Interview Scheduled'
     });
 
     // Notify adopter
     const notifId = `notif_${Date.now()}`;
-    await setDoc(doc(db, 'notifications', notifId), {
+    await setDoc(doc(db, 'adopt_notifications', notifId), {
       id: notifId,
       userId: req.adopterId,
       title: 'Jadwal Wawancara',
@@ -819,7 +835,7 @@ const openEditPassport = (pet) => {
 
 const submitHealthPassport = async () => {
   try {
-    await updateDoc(doc(db, 'adoption_pets', activePet.value.id), {
+    await updateDoc(doc(db, 'adopt_pets', activePet.value.id), {
       vaccinated: healthForm.value.vaccinated,
       sterilized: healthForm.value.sterilized,
       allergies: healthForm.value.allergies,
@@ -827,9 +843,9 @@ const submitHealthPassport = async () => {
       medicalHistory: healthForm.value.medicalHistory
     });
 
-    // Write record inside health_records
+    // Write record inside adopt_health_records
     const hrId = `hr_${activePet.value.id}_${Date.now()}`;
-    await setDoc(doc(db, 'health_records', hrId), {
+    await setDoc(doc(db, 'adopt_health_records', hrId), {
       id: hrId,
       petId: activePet.value.id,
       type: 'Checkup',
@@ -890,7 +906,7 @@ const submitPetForm = async () => {
     ];
 
     if (isEditingPet.value) {
-      await updateDoc(doc(db, 'adoption_pets', activePet.value.id), {
+      await updateDoc(doc(db, 'adopt_pets', activePet.value.id), {
         name: petForm.value.name,
         species: petForm.value.species,
         breed: petForm.value.breed,
@@ -904,7 +920,7 @@ const submitPetForm = async () => {
       alert("Informasi anabul berhasil diperbarui!");
     } else {
       const petId = `pet_adopt_${Date.now()}`;
-      await setDoc(doc(db, 'adoption_pets', petId), {
+      await setDoc(doc(db, 'adopt_pets', petId), {
         id: petId,
         name: petForm.value.name,
         species: petForm.value.species,
@@ -938,7 +954,7 @@ const submitPetForm = async () => {
 const deletePet = async (petId) => {
   if (confirm("Anda yakin ingin menghapus anabul ini dari daftar adopsi?")) {
     try {
-      await deleteDoc(doc(db, 'adoption_pets', petId));
+      await deleteDoc(doc(db, 'adopt_pets', petId));
       alert("Anabul berhasil dihapus.");
       await loadData();
     } catch (err) {
@@ -960,19 +976,19 @@ const deletePet = async (petId) => {
 
 .dashboard-header-card {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   margin-bottom: 2rem;
 }
 
 .role-badge {
   background-color: #B39DDB;
   color: #1A1A1A;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   padding: 0.25rem 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 0.75rem;
   font-weight: 800;
   display: inline-block;
@@ -983,14 +999,14 @@ const deletePet = async (petId) => {
   font-family: 'Fredoka', sans-serif;
   font-size: 2.25rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--color-text-dark);
   margin: 0;
 }
 
 .welcome-subtitle {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #aaaaaa;
+  color: var(--color-text);
   margin-top: 0.25rem;
 }
 
@@ -1003,13 +1019,13 @@ const deletePet = async (petId) => {
 }
 
 .stat-card {
-  border: 3px solid #000000;
-  border-radius: 16px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .stat-card .num {
@@ -1051,10 +1067,10 @@ const deletePet = async (petId) => {
 /* Sidebar Menu navigation */
 .sidebar-menu {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 1.25rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -1063,9 +1079,9 @@ const deletePet = async (petId) => {
 .menu-btn {
   width: 100%;
   text-align: left;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   padding: 0.85rem 1.25rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   font-family: 'Fredoka', sans-serif;
   font-weight: 800;
   font-size: 0.95rem;
@@ -1086,8 +1102,8 @@ const deletePet = async (petId) => {
 .menu-btn.active-btn {
   background-color: #FFF176;
   color: #1A1A1A;
-  border-color: #000000;
-  box-shadow: 3px 3px 0px #000000;
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-neo-hover);
   transform: translate(-1px, -1px);
 }
 
@@ -1098,10 +1114,10 @@ const deletePet = async (petId) => {
 
 .dashboard-section {
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   padding: 2rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .section-title {
@@ -1115,9 +1131,9 @@ const deletePet = async (petId) => {
 .empty-dashboard-state {
   text-align: center;
   padding: 4rem 2rem;
-  border: 3px dashed #000000;
+  border: 2px dashed var(--color-border);
   background-color: #1a1a1a;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
 }
 
 .empty-dashboard-state .icon {
@@ -1129,7 +1145,7 @@ const deletePet = async (petId) => {
 .empty-dashboard-state .text {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #aaaaaa;
+  color: #FFFFFF;
 }
 
 .btn-neo {
@@ -1138,7 +1154,7 @@ const deletePet = async (petId) => {
   padding: 0.65rem 1.25rem;
   background-color: #FF8A65;
   color: #1A1A1A;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 10px;
   box-shadow: 3px 3px 0px 0px #000000;
   cursor: pointer;
@@ -1148,7 +1164,7 @@ const deletePet = async (petId) => {
 
 .btn-neo:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .btn-neo:active {
@@ -1164,11 +1180,11 @@ const deletePet = async (petId) => {
 }
 
 .request-item-card {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   background-color: #1A1A1A;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .req-header-row {
@@ -1189,8 +1205,8 @@ const deletePet = async (petId) => {
   width: 60px;
   height: 60px;
   object-fit: cover;
-  border-radius: 12px;
-  border: 2px solid #000000;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--color-border);
 }
 
 .req-pet-name {
@@ -1209,8 +1225,8 @@ const deletePet = async (petId) => {
 
 .req-status-badge {
   padding: 0.25rem 0.75rem;
-  border: 2px solid #000000;
-  border-radius: 8px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -1227,7 +1243,7 @@ const deletePet = async (petId) => {
 .req-detail-box {
   background-color: #262626;
   border: 2px dashed #000000;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 1rem;
   margin-top: 1rem;
   font-size: 0.85rem;
@@ -1274,7 +1290,7 @@ const deletePet = async (petId) => {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   background-color: #1a1a1a;
   display: flex;
   align-items: center;
@@ -1295,7 +1311,7 @@ const deletePet = async (petId) => {
 .step-active .step-circle {
   background-color: #FFF176;
   color: #1A1A1A;
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: var(--shadow-neo-active);
 }
 
 .step-active .step-label {
@@ -1307,8 +1323,8 @@ const deletePet = async (petId) => {
   color: #ffffff;
 }
 
-/* Appointments & Wishlist grids */
-.appointments-grid {
+/* adopt_appointments & Wishlist grids */
+.adopt_appointments-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
@@ -1316,10 +1332,10 @@ const deletePet = async (petId) => {
 
 .apt-item-card {
   background-color: #1A1A1A;
-  border: 3px solid #000000;
-  border-radius: 16px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .apt-header {
@@ -1333,7 +1349,7 @@ const deletePet = async (petId) => {
   height: 50px;
   object-fit: cover;
   border-radius: 10px;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
 }
 
 .apt-pet-name {
@@ -1372,10 +1388,10 @@ const deletePet = async (petId) => {
 
 .wish-item-card {
   background-color: #1A1A1A;
-  border: 3px solid #000000;
-  border-radius: 16px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 3px 3px 0px #000000;
+  box-shadow: var(--shadow-neo-hover);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -1409,19 +1425,19 @@ const deletePet = async (petId) => {
   margin: 0.15rem 0 0.5rem 0;
 }
 
-/* Notifications styles */
-.notifications-list {
+/* adopt_notifications styles */
+.adopt_notifications-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
 .notif-item-card {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   background-color: #1A1A1A;
   padding: 1rem 1.25rem;
-  border-radius: 12px;
-  box-shadow: 3px 3px 0px #000000;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-neo-hover);
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -1461,10 +1477,10 @@ const deletePet = async (petId) => {
 .chat-wrapper-box {
   display: grid;
   grid-template-columns: 1fr;
-  border: 3px solid #000000;
-  border-radius: 16px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: var(--shadow-neo);
   height: 500px;
 }
 
@@ -1475,7 +1491,7 @@ const deletePet = async (petId) => {
 }
 
 .chat-rooms-sidebar {
-  border-bottom: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
   background-color: #1A1A1A;
   overflow-y: auto;
   display: flex;
@@ -1485,7 +1501,7 @@ const deletePet = async (petId) => {
 @media (min-width: 768px) {
   .chat-rooms-sidebar {
     border-bottom: none;
-    border-right: 3px solid #000000;
+    border-right: var(--border-width) solid var(--color-border);
   }
 }
 
@@ -1512,7 +1528,7 @@ const deletePet = async (petId) => {
   height: 44px;
   object-fit: cover;
   border-radius: 50%;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
 }
 
 .room-info {
@@ -1586,9 +1602,9 @@ const deletePet = async (petId) => {
 .msg-bubble {
   max-width: 70%;
   padding: 0.75rem 1rem;
-  border: 2px solid #000000;
-  border-radius: 12px;
-  box-shadow: 2px 2px 0px #000000;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-neo-active);
   font-size: 0.85rem;
   font-weight: 700;
   color: #1A1A1A;
@@ -1616,7 +1632,7 @@ const deletePet = async (petId) => {
   display: flex;
   padding: 1rem;
   gap: 0.75rem;
-  border-top: 3px solid #000000;
+  border-top: var(--border-width) solid var(--color-border);
   background-color: #1A1A1A;
 }
 
@@ -1723,6 +1739,59 @@ const deletePet = async (petId) => {
 
 .badge.vaccinated.true, .badge.sterilized.true { background-color: #4ADE80; color: #1a1a1a; }
 .badge.vaccinated.false, .badge.sterilized.false { background-color: #FF6B6B; color: #ffffff; }
+
+/* Banner Finder */
+.finder-banner {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: 32px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-neo);
+}
+
+.finder-banner .banner-title {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #1A1A1A;
+  margin: 0 0 1rem 0;
+}
+
+.finder-banner .banner-subtitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0 0 2rem 0;
+}
+
+.btn-finder {
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-weight: 800;
+  background-color: #FFFDF9;
+  color: #1A1A1A;
+  font-size: 1.25rem;
+  padding: 1rem 2rem;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-neo);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-finder:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-neo-hover);
+}
+
+@media (max-width: 768px) {
+  .dashboard-container { padding: 1rem; }
+  .dashboard-header-card { flex-direction: column; text-align: center; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .chat-wrapper-box { grid-template-columns: 1fr; }
+  .chat-rooms-sidebar { max-height: 200px; }
+  .chat-stream-area { height: 400px; }
+}
 
 @media (max-width: 992px) {
   .dashboard-grid {

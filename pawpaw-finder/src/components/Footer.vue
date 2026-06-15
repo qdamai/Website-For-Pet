@@ -18,7 +18,7 @@
             <router-link to="/report" class="footer-link">Laporkan</router-link>
             <router-link to="/chat" class="footer-link">Obrolan</router-link>
             <router-link to="/profile" class="footer-link">Profil</router-link>
-            <router-link to="/adoption" class="footer-link">Portal Adopsi</router-link>
+            <a href="http://localhost:5174" class="footer-link">Portal Adopsi &rarr;</a>
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@
 <style scoped>
 .neo-footer {
   background-color: #1a1a1a;
-  border-top: 3px solid #000000;
+  border-top: var(--border-width) solid var(--color-border);
   padding: 3rem 1rem 1.5rem;
   margin-top: 4rem;
   font-family: 'Nunito', sans-serif;

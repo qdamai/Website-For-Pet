@@ -2,14 +2,14 @@
   <div class="chat-wrapper">
     
     <div class="chat-header-main">
-      <h1 class="chat-title">{{ langStore.t('chats') }}</h1>
+      <h1 class="chat-title">{{ langStore.t('finder_chats') }}</h1>
       <button class="btn-neo" @click="router.back()">{{ langStore.t('back') }}</button>
     </div>
 
     <div class="chat-layout">
       <!-- Chat List Sidebar -->
       <div class="chat-sidebar">
-        <h2 class="sidebar-title">{{ langStore.t('chats') }}</h2>
+        <h2 class="sidebar-title">{{ langStore.t('finder_chats') }}</h2>
         
         <div class="chat-tabs">
           <button 
@@ -55,7 +55,7 @@
                 class="chat-pet-thumb"
               />
               <div v-else-if="chat.type === 'report' || chat.petId" class="chat-pet-thumb-fallback bg-orange">
-                🐾
+                <PawPrint :size="18" class="inline" />
               </div>
               
               <div class="chat-item-text">
@@ -123,6 +123,7 @@
 </template>
 
 <script setup>
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon } from 'lucide-vue-next';
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
@@ -173,7 +174,7 @@ const loadChatList = () => {
   if (authStore.isAdmin) {
     // Admin sees all support chats + any chats they are participants of
     q = query(
-      collection(db, 'chats'),
+      collection(db, 'finder_chats'),
       or(
         where('isAdminChat', '==', true),
         where('participants', 'array-contains', authStore.user.uid)
@@ -182,7 +183,7 @@ const loadChatList = () => {
   } else {
     // User sees chats they are participants of
     q = query(
-      collection(db, 'chats'),
+      collection(db, 'finder_chats'),
       where('participants', 'array-contains', authStore.user.uid)
     );
   }
@@ -241,7 +242,7 @@ const selectRoom = (chatId) => {
   if (unsubMessages) unsubMessages();
   
   const q = query(
-    collection(db, `chats/${chatId}/messages`),
+    collection(db, `finder_chats/${chatId}/messages`),
     orderBy('timestamp', 'asc')
   );
 
@@ -268,8 +269,8 @@ const sendMessage = async () => {
     timestamp: serverTimestamp()
   };
 
-  await addDoc(collection(db, `chats/${currentRoom.value}/messages`), msgData);
-  await updateDoc(doc(db, 'chats', currentRoom.value), {
+  await addDoc(collection(db, `finder_chats/${currentRoom.value}/messages`), msgData);
+  await updateDoc(doc(db, 'finder_chats', currentRoom.value), {
     lastMessage: text,
     updatedAt: serverTimestamp()
   });
@@ -321,11 +322,11 @@ const moveToWhatsApp = () => {
 .chat-sidebar {
   width: 30%;
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   overflow: hidden;
 }
 
@@ -335,7 +336,7 @@ const moveToWhatsApp = () => {
   font-weight: 800;
   margin: 0;
   padding: 1.5rem;
-  border-bottom: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
   background-color: #B39DDB;
   color: #1A1A1A;
 }
@@ -354,7 +355,7 @@ const moveToWhatsApp = () => {
 }
 
 .chat-item {
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -362,12 +363,12 @@ const moveToWhatsApp = () => {
   background-color: #1A1A1A;
   color: #FFFFFF;
   transition: all 0.2s;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .chat-item:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
 }
 
 .chat-item.active {
@@ -398,11 +399,11 @@ const moveToWhatsApp = () => {
 .chat-area {
   width: 70%;
   background-color: var(--color-card-bg);
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   overflow: hidden;
 }
 
@@ -411,7 +412,7 @@ const moveToWhatsApp = () => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
   background-color: #1A1A1A;
 }
 
@@ -428,10 +429,10 @@ const moveToWhatsApp = () => {
   color: white;
   font-weight: 800;
   padding: 0.5rem 1rem;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 3px 3px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   transition: all 0.2s;
 }
 
@@ -453,8 +454,8 @@ const moveToWhatsApp = () => {
 .message-bubble {
   max-width: 75%;
   padding: 1rem;
-  border: 3px solid #000000;
-  box-shadow: 3px 3px 0px 0px #000000;
+  border: var(--border-width) solid var(--color-border);
+  box-shadow: var(--shadow-neo);
   font-weight: 700;
   font-size: 1rem;
   color: #1A1A1A;
@@ -483,7 +484,7 @@ const moveToWhatsApp = () => {
   display: flex;
   padding: 1.5rem;
   gap: 1rem;
-  border-top: 3px solid #000000;
+  border-top: var(--border-width) solid var(--color-border);
   background-color: #1A1A1A;
 }
 
@@ -493,9 +494,9 @@ const moveToWhatsApp = () => {
   padding: 0.75rem 1.5rem;
   background-color: #FF8A65;
   color: #1A1A1A;
-  border: 3px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 4px 4px 0px 0px #000000;
+  box-shadow: var(--shadow-neo);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1rem;
@@ -516,7 +517,7 @@ const moveToWhatsApp = () => {
 
 .chat-tabs {
   display: flex;
-  border-bottom: 3px solid #000000;
+  border-bottom: var(--border-width) solid var(--color-border);
   background-color: #1A1A1A;
 }
 
@@ -531,7 +532,7 @@ const moveToWhatsApp = () => {
   color: #FFFFFF;
   cursor: pointer;
   transition: all 0.2s;
-  border-right: 2px solid #000000;
+  border-right: var(--border-width) solid var(--color-border);
 }
 
 .chat-tabs .tab-btn:last-child {
@@ -557,7 +558,7 @@ const moveToWhatsApp = () => {
   width: 44px;
   height: 44px;
   border-radius: 8px;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -566,7 +567,7 @@ const moveToWhatsApp = () => {
   width: 44px;
   height: 44px;
   border-radius: 8px;
-  border: 2px solid #000000;
+  border: var(--border-width) solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
