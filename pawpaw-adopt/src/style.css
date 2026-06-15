@@ -91,7 +91,7 @@ input, textarea, button, select {
   color: #9CA3AF;
   font-weight: 500;
 }
-\n.neo-input:focus {
+.neo-input:focus {
   box-shadow: 0 0 0 3px rgba(255, 154, 118, 0.3);
   border-color: var(--color-primary);
   transform: translateY(-1px);
