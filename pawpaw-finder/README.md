@@ -1,87 +1,200 @@
-# 🐾 PawPaw Finder
+<div align="center">
 
-**PawPaw Finder** adalah aplikasi web modern *real-time* yang didedikasikan untuk membantu komunitas menemukan dan mempertemukan kembali hewan peliharaan yang hilang. Dibangun dengan antarmuka yang responsif, imut, dan memukau, platform ini memudahkan Anda untuk melaporkan hewan peliharaan yang hilang, menemukan hewan peliharaan terlantar, dan berkoordinasi melalui peta interaktif serta fitur *live chat*.
+# 🔍 PawPaw Finder
 
-## ✨ Fitur Utama
+**Real-time Lost & Found Pet Tracker — Track, report, and reunite lost pets in your community.**
 
-- **🗺️ Interactive Pet Radar Map**: Peta *real-time* (didukung oleh Leaflet) untuk melacak dan mencari lokasi hewan peliharaan secara visual di area Anda.
-- **💬 Real-time Live Chat**: Fitur percakapan langsung berbasis Firebase yang memungkinkan komunikasi instan antara pemilik hewan dan penemu.
-- **🌙 Complete Dark Theme**: Desain antarmuka yang indah, *fully responsive*, dan nyaman di mata dengan dukungan *dark mode* bawaan (menggunakan Tailwind CSS v4).
-- **📋 Comprehensive Reporting**: Buat laporan detail dengan mudah, termasuk unggahan foto dan penandaan lokasi (*geolocation*) yang presisi.
-- **📊 Dashboard Interaktif**: Hub pusat untuk mengelola laporan, melacak status, dan mengekspor data (mendukung format PDF & Excel) baik untuk Pengguna maupun Admin.
-- **📱 QR Code Generation**: Buat QR Code untuk profil hewan peliharaan secara instan agar mudah dibagikan ke media sosial atau dicetak pada poster.
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-pawpaw--finder.vercel.app-4ADE80?style=for-the-badge)](https://pawpaw-finder.vercel.app)
+[![Vue 3](https://img.shields.io/badge/Vue-3-42b883?style=for-the-badge&logo=vue.js)](https://vuejs.org)
+[![Firebase](https://img.shields.io/badge/Firebase-Firestore_Auth-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38BDF8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
+
+</div>
+
+---
+
+## 📖 About
+
+**PawPaw Finder** is a mobile-first web application that helps communities track and reunite lost pets. Users can report missing pets, share sightings of found animals, browse an interactive radar map, and communicate in real-time via live chat — all powered by Firebase.
+
+---
+
+## ✨ Features
+
+### 🗺️ Pet Radar Map
+Interactive map built with **Leaflet** showing pins of all reported lost & found pets near you. Click any pin to view the full report.
+
+### 📋 Lost & Found Reporting
+- Submit detailed lost pet reports with photos, description, and live map pin
+- Report found animals and notify nearby users
+- Track your own submitted reports in the User Dashboard
+
+### 💬 Real-time Live Chat
+Firebase Firestore-powered community chat organized by location. Chat with others in your area to coordinate pet searches.
+
+### 👤 User Dashboard
+- View all your submitted reports
+- Track status updates (Missing / Found / Reunited)
+- Edit or delete your reports
+
+### 🛡️ Admin Panel
+- Moderate all user reports (approve/reject/deactivate)
+- Manage registered users
+- Database seeder tools for demo/testing
+
+### 🌙 Neo-Brutalism Dark Theme
+Full dark mode with neo-brutalism design system — chunky borders, bold shadows, vibrant accents.
+
+---
+
+## 🧩 Pages & Routes
+
+| Route | Page | Description |
+|---|---|---|
+| `/` | Splash | Landing / intro screen |
+| `/onboarding` | Onboarding | First-time user walkthrough |
+| `/auth` | Auth | Login & Register |
+| `/dashboard` | Dashboard | User home, report feed |
+| `/explore` | Explore | Browse all lost & found posts |
+| `/lost` | LostFeed | Filter: lost pets only |
+| `/found` | FoundFeed | Filter: found pets only |
+| `/pet/:id` | PetDetail | Full detail of a pet report |
+| `/report/lost` | ReportLost | Form: report a lost pet |
+| `/report/found` | ReportFound | Form: report a found pet |
+| `/report/new` | ReportForm | Combined report form |
+| `/map` | PetRadarMap | Full-screen radar map |
+| `/chat` | LiveChat | Real-time community chat |
+| `/profile` | Profile | User profile & settings |
+| `/admin` | AdminPanel | Admin: moderate & manage |
+| `/admin/dashboard` | AdminDashboard | Admin analytics overview |
+
+---
 
 ## 🛠️ Tech Stack
 
-### Core
-- **[Vue 3](https://vuejs.org/)** (Composition API / `<script setup>`)
-- **[Vite](https://vitejs.dev/)** (Next Generation Frontend Tooling)
-- **[Tailwind CSS v4](https://tailwindcss.com/)** (Utility-first CSS framework)
+| Category | Technology |
+|---|---|
+| **Framework** | Vue 3 (Composition API) |
+| **Build Tool** | Vite 8 |
+| **Styling** | Tailwind CSS v4 |
+| **State Management** | Pinia |
+| **Routing** | Vue Router 5 |
+| **Database** | Firebase Firestore |
+| **Authentication** | Firebase Auth |
+| **Maps** | Leaflet + @vue-leaflet/vue-leaflet |
+| **PDF Export** | jsPDF + html2pdf.js |
+| **Icons** | Lucide Vue Next |
+| **Hosting** | Vercel |
 
-### State Management & Routing
-- **[Pinia](https://pinia.vuejs.org/)** (Intuitive, type safe state management)
-- **[Vue Router](https://router.vuejs.org/)**
+---
 
-### Backend Services
-- **[Firebase](https://firebase.google.com/)** (Authentication, Firestore Database, Cloud Storage)
+## 🚀 Getting Started
 
-### Libraries & Integrations
-- **Maps**: `leaflet` & `@vue-leaflet/vue-leaflet`
-- **Icons**: `lucide-vue-next`
-- **Data Export**: `jspdf`, `html2pdf.js`, `xlsx`
-- **QR Codes**: `qrcode.vue`
+### Prerequisites
+- Node.js 18+
+- npm 9+
+- Firebase project (Firestore + Auth enabled)
 
-## 🚀 Cara Menjalankan Project
+### Installation
 
-### Prasyarat
+```bash
+# 1. Masuk ke folder
+cd pawpaw-finder
 
-Pastikan Anda telah menginstal [Node.js](https://nodejs.org/) (disarankan v18 ke atas) di komputer Anda.
+# 2. Install dependencies
+npm install
 
-### Instalasi
+# 3. Buat file environment
+cp .env.example .env
+```
 
-1. **Clone repositori ini** (jika belum):
-   ```bash
-   git clone https://github.com/qdamai/Website-For-Pet.git
-   cd Website-For-Pet/pawpaw-finder
-   ```
+### Konfigurasi `.env`
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
+```
 
-3. **Atur Variabel Lingkungan (Environment Variables) Firebase**:
-   Buat file bernama `.env` di dalam folder `pawpaw-finder` dan tambahkan konfigurasi Firebase Anda (ganti nilainya dengan kredensial project Firebase Anda yang asli):
-   ```env
-   VITE_FIREBASE_API_KEY=your_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   ```
+### Run Development Server
 
-4. **Jalankan server development**:
-   ```bash
-   npm run dev
-   ```
-   Aplikasi akan berjalan dan bisa diakses melalui `http://localhost:5173`.
+```bash
+npm run dev
+# → http://localhost:5174
+```
 
-## 📦 Build untuk Production
+### Build for Production
 
-Untuk melakukan *build* aplikasi agar siap di-*deploy*, jalankan perintah:
 ```bash
 npm run build
+# Output: dist/
 ```
-Anda kemudian bisa melihat hasil *build* secara lokal dengan perintah:
+
+---
+
+## 📁 Project Structure
+
+```
+pawpaw-finder/
+├── public/             # Static assets
+├── src/
+│   ├── assets/         # Images, icons, fonts
+│   ├── components/     # Reusable Vue components
+│   │   ├── Navbar.vue
+│   │   ├── EmptyState.vue
+│   │   ├── NeoButton.vue
+│   │   └── SkeletonLoader.vue
+│   ├── firebase/       # Firebase config & init
+│   ├── router/         # Vue Router routes
+│   ├── stores/         # Pinia stores (auth, pets, etc)
+│   ├── utils/          # Helper functions & seeder
+│   ├── views/          # Page components (20 pages)
+│   ├── App.vue
+│   ├── main.js
+│   └── style.css
+├── .env.example
+├── vercel.json         # Vercel SPA routing config
+├── vite.config.js
+└── package.json
+```
+
+---
+
+## ☁️ Deployment (Vercel)
+
 ```bash
-npm run preview
+# Install Vercel CLI
+npm install -g vercel
+
+# Login
+vercel login
+
+# Deploy production
+vercel --prod
 ```
 
-## 🤝 Berkontribusi
+Setelah deploy, tambahkan semua `VITE_*` environment variables di **Vercel Dashboard → Settings → Environment Variables**, lalu redeploy.
 
-Kontribusi, laporan *bug*, dan permintaan fitur sangat kami hargai! Jangan ragu untuk mengunjungi [halaman issues](https://github.com/qdamai/Website-For-Pet/issues) kami.
+> ⚠️ **Penting:** Tambahkan domain Vercel (`pawpaw-finder.vercel.app`) ke **Firebase Console → Authentication → Authorized Domains**.
 
-## 📄 Lisensi
+---
 
-Project ini dilisensikan di bawah lisensi MIT.
+## 📄 License
+
+MIT License — feel free to use, modify, and distribute.
+
+---
+
+<div align="center">
+
+**🐾 Part of the [PawPaws](https://github.com/qdamai/Website-For-Pet) ecosystem**
+
+[🏠 PawPaw Adopt →](https://pawpaw-adopt.vercel.app)
+
+</div>
