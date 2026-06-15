@@ -461,7 +461,7 @@ const submitStory = async () => {
 }
 
 .form-group .neo-input {
-  background-color: var(--color-text-dark);
+  background-color: #FFFFFF;
   color: #1A1A1A;
 }
 
