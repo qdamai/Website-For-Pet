@@ -473,6 +473,7 @@ import {
   query, 
   where, 
   getDocs, 
+  getDoc,
   setDoc, 
   updateDoc, 
   doc, 
