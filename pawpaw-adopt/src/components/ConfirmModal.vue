@@ -3,7 +3,9 @@
     <transition name="modal-fade">
       <div v-if="visible" class="confirm-overlay" @click.self="onCancel">
         <div class="confirm-card">
-          <div class="confirm-icon">{{ iconMap[type] }}</div>
+          <div class="confirm-icon">
+            <component :is="iconMap[type]" :size="48" />
+          </div>
           <h3 class="confirm-title">{{ title }}</h3>
           <p class="confirm-message">{{ message }}</p>
           <div class="confirm-actions">
@@ -18,6 +20,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { Info, Trash2, AlertTriangle, CheckCircle2 } from 'lucide-vue-next';
 
 const visible = ref(false);
 const title = ref('');
@@ -26,7 +29,7 @@ const type = ref('info'); // info | danger | warning
 const confirmText = ref('Ya, Lanjutkan');
 const cancelText = ref('Batal');
 
-const iconMap = { info: '💡', danger: '🗑️', warning: '⚠️', success: '✅' };
+const iconMap = { info: Info, danger: Trash2, warning: AlertTriangle, success: CheckCircle2 };
 
 let resolveFn = null;
 
@@ -82,8 +85,11 @@ defineExpose({ open });
 }
 
 .confirm-icon {
-  font-size: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 1rem;
+  color: #ffffff;
 }
 
 .confirm-title {

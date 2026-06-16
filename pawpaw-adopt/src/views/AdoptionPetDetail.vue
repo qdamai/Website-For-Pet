@@ -147,10 +147,10 @@
             class="btn-neo btn-adopt-main"
             :class="{ 'btn-adopted': pet.status === 'Adopted', 'btn-reserved': pet.status === 'Reserved' }"
           >
-            <span v-if="adoptLoading">⏳ Memuat...</span>
-            <span v-else-if="pet.status === 'Available'">🐾 Ajukan Adopsi Sekarang</span>
-            <span v-else-if="pet.status === 'Reserved'">🔒 Hewan Sedang Dipesan</span>
-            <span v-else>✅ Sudah Diadopsi</span>
+            <span v-if="adoptLoading" class="flex items-center gap-2"><Loader2 :size="18" class="inline animate-spin" /> Memuat...</span>
+            <span v-else-if="pet.status === 'Available'" class="flex items-center gap-2"><PawPrint :size="18" class="inline" /> Ajukan Adopsi Sekarang</span>
+            <span v-else-if="pet.status === 'Reserved'" class="flex items-center gap-2"><Lock :size="18" class="inline" /> Hewan Sedang Dipesan</span>
+            <span v-else class="flex items-center gap-2"><CheckCircle2 :size="18" class="inline" /> Sudah Diadopsi</span>
           </button>
 
           <!-- Wishlist + Secondary Actions -->
@@ -160,7 +160,7 @@
               class="btn-neo btn-secondary btn-wishlist"
               :class="{ 'wishlisted': isWishlisted }"
             >
-              {{ isWishlisted ? '💖 Disimpan' : '🤍 Simpan' }}
+              <Heart :size="16" class="inline" :fill="isWishlisted ? 'currentColor' : 'none'" /> {{ isWishlisted ? 'Disimpan' : 'Simpan' }}
             </button>
             <button @click="showVisitModal = true" class="btn-neo btn-secondary">
               <Calendar :size="18" class="inline" /> Kunjungan
@@ -207,7 +207,7 @@
 </template>
 
 <script setup>
-import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon, Building, Zap, Shield, Baby } from 'lucide-vue-next';
+import { FileText, MessageSquare, MapPin, Settings, Home, Camera, Calendar, PawPrint, Dog, Cat, AlertTriangle, XCircle, CheckCircle, Target, Heart, BarChart2, Dna, Cake, Scale, Sun, Moon, Building, Zap, Shield, Baby, Loader2, Lock, CheckCircle2, HeartOff } from 'lucide-vue-next';
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -285,7 +285,7 @@ const handleToggleWishlist = async () => {
   }
   await wishlistStore.toggleWishlist(authStore.user.uid, id);
   if (wishlistStore.wishlistedIds.includes(id)) {
-    toast.value?.success('Ditambahkan ke Wishlist! 💖', `${pet.value?.name} tersimpan di wishlist Anda.`);
+    toast.value?.success('Ditambahkan ke Wishlist!', `${pet.value?.name} tersimpan di wishlist Anda.`);
   } else {
     toast.value?.info('Dihapus dari Wishlist', `${pet.value?.name} dihapus dari wishlist.`);
   }
@@ -316,7 +316,7 @@ const submitAppointment = async () => {
     };
 
     await setDoc(doc(db, 'adopt/data/appointments', aptId), appointmentDoc);
-    toast.value?.success('Jadwal Berhasil Dikirim! 📅', 'Kunjungan shelter sedang menunggu konfirmasi. Cek dashboard Anda.');
+    toast.value?.success('Jadwal Berhasil Dikirim!', 'Kunjungan shelter sedang menunggu konfirmasi. Cek dashboard Anda.');
     showVisitModal.value = false;
     visitForm.value = { date: '', time: '', notes: '' };
   } catch (err) {
